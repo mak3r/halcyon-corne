@@ -10,8 +10,8 @@ This repo is QMK/Vial + **wired only**. A wireless build of the same keyboard wo
 
 Related repos/directories (not part of this repo, but relevant context):
 - `~/projects/halcyon` — the splitkb Halcyon *case files* fork (3D-print/laser-cut files only, no firmware). Also holds:
-  - `corne-vial/mak3rs.vil` — a live Vial-app keymap export with the actual intended key layout. This export uses the pre-refactor legacy row/column matrix (module buttons on extra rows), so it only imports cleanly onto firmware built with the `vial_hlc_legacy` keymap, not `vial_hlc` (which moved module buttons to extra columns) — see `README.md:98`. This isn't compiled firmware (Vial keymaps are remapped live, post-flash, without recompiling), so it doesn't strictly need to be ported into source — but see "Planned work" below for the intended direction of baking it into the `mak3r` keymap's source instead.
-  - `zsa_moonlander/keymap.c` (lines 91-128) — the source for the per-key/per-layer RGB `ledmap` + `set_layer_color()` pattern from a ZSA Moonlander/Oryx export, which is the reference for the LED-color work planned for this keyboard (see "Planned work" below). LED colors, unlike the key layout, **do** require compiled firmware — Vial's UI has no per-key/per-layer color support.
+  - `corne-vial/mak3rs.vil` — a live Vial-app keymap export with the actual intended key layout. This export uses the pre-refactor legacy row/column matrix (module buttons on extra rows), so it only imports cleanly onto firmware built with the `vial_hlc_legacy` keymap, not `vial_hlc` (which moved module buttons to extra columns) — see `README.md:98`. This isn't compiled firmware (Vial keymaps are remapped live, post-flash, without recompiling), but it's been baked directly into the `mak3r` keymap's source instead — see "The `mak3r` keymap" below.
+  - `zsa_moonlander/keymap.c` (lines 91-128) — the source for the per-key/per-layer RGB `ledmap` + `set_layer_color()` pattern from a ZSA Moonlander/Oryx export, adapted (by key role, not literal LED index) for this keyboard's RGB colors — see "The `mak3r` keymap" below. LED colors, unlike the key layout, **do** require compiled firmware — Vial's UI has no per-key/per-layer color support.
 
 ## How this repo works (inherited from splitkb/qmk_userspace)
 
@@ -31,10 +31,19 @@ qmk compile -kb splitkb/halcyon/corne/rev2 -km <keymap> -e <HLC_MODULE>=1 -e TAR
 ```
 Requires a local QMK CLI + a `vial-kb/vial-qmk` checkout set up via `qmk setup -H path/to/vial-qmk` (see upstream README for full first-time setup). CI does not require any of this locally — pushing is sufficient to get a build.
 
-## Planned work (not yet done)
+## The `mak3r` keymap
 
-1. Copy the stock `vial_hlc_legacy` keymap (required for compatibility with the pre-existing `mak3rs.vil` export — see "Related repos" above) to a `mak3r` keymap, add matching `qmk.json` targets, and keep the stock `vial_hlc_legacy` targets as a permanent known-good comparison. Bake the real key layout into this keymap's compiled source (converted from the Vial export) rather than relying on a live post-flash Vial import. (`vial_hlc`'s newer button-mapping scheme remains a documented option only if the keymap is ever rebuilt from scratch directly in Vial.)
-2. Port the `ledmap`/`set_layer_color()` pattern from `~/projects/halcyon/zsa_moonlander/keymap.c:91-128` into the new keymap, sized off `RGB_MATRIX_LED_COUNT` and this board's own `keyboards/splitkb/halcyon/corne/rev2/keyboard.json` LED layout (54 LEDs, 27/side) rather than hardcoded Moonlander LED indices.
+`keyboards/splitkb/halcyon/corne/keymaps/mak3r/` is the custom keymap (forked from `vial_hlc_legacy`, for the same reason — compatibility with `mak3rs.vil`-style Vial exports). Unlike the stock keymaps, its key layout is baked into `keymap.json` directly (converted from a Vial export) rather than requiring a post-flash Vial import.
+
+Per-key/per-layer RGB colors are **data-driven**, not hand-written C:
+- `rgb_layers.csv` — the source of truth. One row per lit LED, keyed by `layer,row,col` (same 10×6 matrix coordinates as `keymap.json`), plus `h,s,v`. Supports `*` wildcards for row/col to fill a whole layer or row at once. Unlisted positions default to off.
+- `generate_ledmap.py` — reads the CSV and emits `ledmap.c` (the actual `ledmap[][RGB_MATRIX_LED_COUNT][3]` array + `set_layer_color()`/`rgb_matrix_indicators_user()` hooks, following the pattern from `~/projects/halcyon/zsa_moonlander/keymap.c:91-128`, adapted by key role rather than literal LED index since the two boards' physical layouts differ).
+- After editing `rgb_layers.csv`, run `python3 generate_ledmap.py` and commit the regenerated `ledmap.c` — the firmware build itself stays fully static, no Python involved at build/CI time.
+- Only layer 0 (fully) and layer 1 (partially) have real color intent so far; layers 2-7 are a solid-blue placeholder pending further design.
+
+This CSV-based approach is intentionally chosen to stay compatible with a possible future Oryx-like editor UI: both `keymap.json` (keycodes) and `rgb_layers.csv` (colors) are plain, structured formats a future tool could read/write directly, regenerating `ledmap.c` and triggering a rebuild — no architecture change needed to support that later.
+
+Stock `vial_hlc_legacy` targets remain in `qmk.json` as the permanent known-good comparison.
 
 ## Commit standards
 

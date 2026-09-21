@@ -16,6 +16,22 @@
                 "HLC_CIRQUE_TRACKPAD": "1",
                 "TARGET": "halcyon_corne_wired_right_cirquetrackpad"
             }
+        ],
+        [
+            "splitkb/halcyon/corne/rev2",
+            "mak3r",
+            {
+                "HLC_TFT_DISPLAY": "1",
+                "TARGET": "halcyon_corne_wired_left_tftdisplay_mak3r"
+            }
+        ],
+        [
+            "splitkb/halcyon/corne/rev2",
+            "mak3r",
+            {
+                "HLC_CIRQUE_TRACKPAD": "1",
+                "TARGET": "halcyon_corne_wired_right_cirquetrackpad_mak3r"
+            }
         ]
     ]
 }

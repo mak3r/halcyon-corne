@@ -1,0 +1,64 @@
+# Per-layer, per-key RGB Matrix colors for the mak3r keymap.
+#
+# Format: layer,row,col,h,s,v
+#   - layer/row/col match the same 10x6 matrix coordinates used in keymap.json/vial.json.
+#   - row/col may be "*" to mean "every key on this layer" (a layer-wide fill). Rows are
+#     applied top-to-bottom, so a wildcard fill followed by specific row,col entries lets you
+#     paint broad first and override individual keys after.
+#   - Any (layer,row,col) not covered by any row here defaults to off (0,0,0). Module-row
+#     positions (row 4/9) and the unused matrix padding (row 3/8 cols 0-2) have no LEDs at all
+#     (see halcyon_overrides.c's g_led_config) and are ignored even if listed.
+#   - h,s,v are 0-255 (QMK's HSV range), scaled at runtime by the live RGB Matrix brightness
+#     (RM_VALU/RM_VALD), same as stock RGB Matrix effects.
+#
+# Regenerate ledmap.c after editing this file: `python3 generate_ledmap.py`
+#
+# Color intent below is translated BY KEY ROLE from a ZSA Moonlander/Oryx reference
+# (~/projects/halcyon/zsa_moonlander/keymap.c:91-128), not by literal LED index -- the two
+# boards have different physical layouts, so only the role->color mapping carries over.
+# Only layer 0 (fully) and layer 1 (partially) have real intent so far; layers 2-7 are a
+# solid-blue placeholder until designed.
+layer,row,col,h,s,v
+
+# --- Layer 0 (Base/QWERTY) ---
+# Top row (both halves): blue
+0,0,*,152,255,255
+0,5,*,152,255,255
+# Home row (both halves): green
+0,1,*,74,255,255
+0,6,*,74,255,255
+# Home-row mod-tap Ctrl key overrides (col 3 = LCTL_T/RCTL_T position): desaturated green
+0,1,3,74,42,255
+0,6,3,74,42,255
+# Bottom row (both halves): green
+0,2,*,74,255,255
+0,7,*,74,255,255
+# Thumb cluster (GUI / layer-mo / Space·Enter): purple highlight
+0,3,3,188,255,255
+0,3,4,188,255,255
+0,3,5,188,255,255
+0,8,3,188,255,255
+0,8,4,188,255,255
+0,8,5,188,255,255
+
+# --- Layer 1 (Symbols/Numpad) ---
+# Active (non-transparent) keys: blue
+1,0,*,152,255,255
+1,1,*,152,255,255
+1,2,*,152,255,255
+1,5,*,152,255,255
+1,6,*,152,255,255
+1,7,2,152,255,255
+1,7,3,152,255,255
+1,7,4,152,255,255
+1,7,5,152,255,255
+# OSL(3) thumb key: purple highlight (matches layer 0's thumb highlight)
+1,8,4,188,255,255
+
+# --- Layers 2-7: placeholder, not designed yet ---
+2,*,*,152,255,255
+3,*,*,152,255,255
+4,*,*,152,255,255
+5,*,*,152,255,255
+6,*,*,152,255,255
+7,*,*,152,255,255
