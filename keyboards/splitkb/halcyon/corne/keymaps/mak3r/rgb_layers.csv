@@ -13,60 +13,133 @@
 #
 # Regenerate ledmap.c after editing this file: `python3 generate_ledmap.py`
 #
-# Color intent below is translated BY KEY ROLE from a ZSA Moonlander/Oryx reference
-# (~/projects/halcyon/zsa_moonlander/keymap.c:91-128), not by literal LED index -- the two
-# boards have different physical layouts, so only the role->color mapping carries over.
-# Only layer 0 (fully) and layer 1 (partially) have real intent so far; layers 2-7 are a
-# solid-blue placeholder until designed.
+# Designed interactively in the Corne Palette Editor artifact tool (per-key color picker
+# matching the physical layout) and pulled in from there. Layers 0-3 have real designed
+# colors; layers 4-7 are a solid-blue placeholder until designed.
 layer,row,col,h,s,v
 
-# --- Layer 0 (Base/QWERTY) ---
-# Each main row (top/home/bottom, both halves) is green by default...
-0,0,*,74,255,255
-0,1,*,74,255,255
-0,2,*,74,255,255
-0,5,*,74,255,255
-0,6,*,74,255,255
-0,7,*,74,255,255
-# ...except the outer column (col 0 on both halves -- the pinky-edge key on
-# each side: Tab/Esc/LShift on the left, Bspc/Quote/RShift on the right),
-# which is blue,
+# --- Layer 0: Base/QWERTY -- outer column blue, F/J homing keys lighter purple, rest green, thumb purple. ---
 0,0,0,152,255,255
+0,0,1,74,255,255
+0,0,2,74,255,255
+0,0,3,74,255,255
+0,0,4,74,255,255
+0,0,5,74,255,255
 0,1,0,152,255,255
-0,2,0,152,255,255
-0,5,0,152,255,255
-0,6,0,152,255,255
-0,7,0,152,255,255
-# ...and the home-row homing keys (F/J, col 4 on both halves -- the keys with
-# a tactile bump), which get a lighter purple.
+0,1,1,74,255,255
+0,1,2,74,255,255
+0,1,3,74,255,255
 0,1,4,188,128,255
-0,6,4,188,128,255
-# Thumb cluster (GUI / layer-mo / Space·Enter): purple highlight
+0,1,5,74,255,255
+0,2,0,152,255,255
+0,2,1,74,255,255
+0,2,2,74,255,255
+0,2,3,74,255,255
+0,2,4,74,255,255
+0,2,5,74,255,255
 0,3,3,188,255,255
 0,3,4,188,255,255
 0,3,5,188,255,255
+0,5,0,152,255,255
+0,5,1,74,255,255
+0,5,2,74,255,255
+0,5,3,74,255,255
+0,5,4,74,255,255
+0,5,5,74,255,255
+0,6,0,152,255,255
+0,6,1,74,255,255
+0,6,2,74,255,255
+0,6,3,74,255,255
+0,6,4,188,128,255
+0,6,5,74,255,255
+0,7,0,152,255,255
+0,7,1,74,255,255
+0,7,2,74,255,255
+0,7,3,74,255,255
+0,7,4,74,255,255
+0,7,5,74,255,255
 0,8,3,188,255,255
 0,8,4,188,255,255
 0,8,5,188,255,255
 
-# --- Layer 1 (Symbols/Numpad) ---
-# Active (non-transparent) keys: blue
-1,0,*,152,255,255
-1,1,*,152,255,255
-1,2,*,152,255,255
-1,5,*,152,255,255
-1,6,*,152,255,255
+# --- Layer 1: Symbols/Numpad -- outer column blue on active rows, rest blue/green mix, thumb purple. ---
+1,0,0,152,255,255
+1,0,1,74,255,255
+1,0,2,74,255,255
+1,0,3,74,255,255
+1,0,4,74,255,255
+1,0,5,74,255,255
+1,1,0,152,255,255
+1,1,1,152,255,255
+1,1,2,152,255,255
+1,1,3,152,255,255
+1,1,4,152,255,255
+1,1,5,152,255,255
+1,2,0,152,255,255
+1,2,1,152,255,255
+1,2,2,152,255,255
+1,2,3,152,255,255
+1,2,4,152,255,255
+1,2,5,152,255,255
+1,3,3,188,255,255
+1,3,4,188,255,255
+1,3,5,188,255,255
+1,5,0,152,255,255
+1,5,1,74,255,255
+1,5,2,74,255,255
+1,5,3,74,255,255
+1,5,4,74,255,255
+1,5,5,74,255,255
+1,6,0,152,255,255
+1,6,1,152,255,255
+1,6,2,152,255,255
+1,6,3,152,255,255
+1,6,4,152,255,255
+1,6,5,152,255,255
 1,7,2,152,255,255
 1,7,3,152,255,255
 1,7,4,152,255,255
 1,7,5,152,255,255
-# OSL(3) thumb key: purple highlight (matches layer 0's thumb highlight)
-1,8,4,188,255,255
+1,8,3,188,255,255
+1,8,4,128,255,255
+1,8,5,188,255,255
 
-# --- Layers 2-7: placeholder, not designed yet ---
+# --- Layer 2: Nav -- blue fill, arrow-key row and thumb keys picked out. ---
 2,*,*,152,255,255
+2,3,3,188,255,255
+2,3,4,128,255,255
+2,3,5,188,255,255
+2,6,1,74,255,255
+2,6,2,74,255,255
+2,6,3,74,255,255
+2,6,4,74,255,255
+2,8,3,188,255,255
+2,8,4,188,255,255
+2,8,5,188,255,255
+
+# --- Layer 3: Function -- blue fill, QK_BOOT in red, F-key row accents in orange, thumb purple. ---
 3,*,*,152,255,255
+3,0,0,128,255,255
+3,1,4,74,255,255
+3,3,3,188,255,255
+3,3,4,188,255,255
+3,3,5,188,255,255
+3,5,0,0,255,255
+3,6,0,21,255,255
+3,6,1,21,255,255
+3,6,2,74,255,255
+3,8,3,188,255,255
+3,8,4,188,255,255
+3,8,5,188,255,255
+
+# --- Layer 4: Placeholder, not designed yet. ---
 4,*,*,152,255,255
+
+# --- Layer 5: Placeholder, not designed yet. ---
 5,*,*,152,255,255
+
+# --- Layer 6: Placeholder, unused layer. ---
 6,*,*,152,255,255
+
+# --- Layer 7: Placeholder, unused layer. ---
 7,*,*,152,255,255
