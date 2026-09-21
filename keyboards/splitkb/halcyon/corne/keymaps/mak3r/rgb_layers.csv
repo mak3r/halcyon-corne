@@ -15,7 +15,8 @@
 #
 # Designed interactively in the Corne Palette Editor artifact tool (per-key color picker
 # matching the physical layout) and pulled in from there. Layers 0-3 have real designed
-# colors; layers 4-7 are a solid-blue placeholder until designed.
+# colors; layers 4-7 (mostly-unused return/placeholder layers) are dim, distinct shades
+# of white rather than a designed per-key scheme.
 layer,row,col,h,s,v
 
 # --- Layer 0: Base/QWERTY -- outer column blue, F/J homing keys lighter purple, rest green, thumb purple. ---
@@ -132,14 +133,14 @@ layer,row,col,h,s,v
 3,8,4,188,255,255
 3,8,5,188,255,255
 
-# --- Layer 4: Placeholder, not designed yet. ---
-4,*,*,152,255,255
+# --- Layer 4: Return -- dim white. ---
+4,*,*,0,0,216
 
-# --- Layer 5: Placeholder, not designed yet. ---
-5,*,*,152,255,255
+# --- Layer 5: Return2 -- dim white. ---
+5,*,*,0,0,234
 
-# --- Layer 6: Placeholder, unused layer. ---
-6,*,*,152,255,255
+# --- Layer 6: Unused -- dim white. ---
+6,*,*,0,0,231
 
-# --- Layer 7: Placeholder, unused layer. ---
-7,*,*,152,255,255
+# --- Layer 7: Unused -- dim white. ---
+7,*,*,0,0,238

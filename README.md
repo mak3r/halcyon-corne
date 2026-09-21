@@ -53,6 +53,30 @@ If you want to add a keyboard which doesn't have support for Halcyon modules yet
 This repository contains keymaps for both upstream QMK (default_hlc) and Vial (vial_hlc). For the officially supported keyboards we will always provide these two keymaps. 
 
 
+## Editing This Fork's Keymap (`mak3r`)
+
+This fork's day-to-day keymap is `mak3r` (`keyboards/splitkb/halcyon/corne/keymaps/mak3r/`). Unlike the stock keymaps above, its key layout is baked into `keymap.json` from a Vial export and its per-key RGB colors are generated from a CSV, rather than left as live, unsaved Vial/EEPROM state.
+
+### Editing keycodes: Vial ([vial.rocks](https://vial.rocks))
+
+The keyboard is Vial-enabled, so the normal way to change what a key does is **[vial.rocks](https://vial.rocks)** (or the Vial desktop app) — connect the keyboard and remap keys live, same as any Vial keyboard. That live change alone only lives in the keyboard's EEPROM, though — to make it permanent (so it survives a future reflash from this repo's compiled firmware), export the keymap from Vial (Settings → Export Keymap, a `.vil` file) and run:
+
+```bash
+cd keyboards/splitkb/halcyon/corne/keymaps/mak3r
+python3 generate_keymap_from_vil.py path/to/export.vil
+```
+
+then rebuild/reflash. See `CLAUDE.md`'s "The `mak3r` keymap" section for the full workflow and a keycode-alias quirk this fork's build has hit before.
+
+### Editing colors: the Corne Palette Editor
+
+Per-key/per-layer RGB colors aren't editable in Vial's UI at all, so this fork has its own tool for it: **Corne Palette Editor**, an interactive picker matching the Corne's actual physical layout (column stagger, thumb clusters, both halves), showing each key's real current keycode for context.
+
+- **Source**: `keyboards/splitkb/halcyon/corne/keymaps/mak3r/palette-editor.html`.
+- **To use it**: ask Claude to open/republish it as an Artifact — it needs Claude's Artifact runtime (specifically the `db` capability) to save your color choices as you go and read them back afterward. Opening the raw HTML file directly still renders the picker, but without that runtime your changes won't persist or reach Claude; use its "View/copy CSV" panel to grab colors manually in that case.
+- Ask Claude to pull your saved colors in whenever you're ready — it regenerates `rgb_layers.csv` (`generate_ledmap.py` then turns that into the compiled `ledmap.c`) and rebuilds.
+
+
 ## Initial Setup & Prerequisites
 
 Before configuring your keymaps or building firmware, you need to set up your build environment. 

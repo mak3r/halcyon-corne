@@ -1,0 +1,704 @@
+<title>Corne Palette Editor</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --panel-2: #1d212a;
+    --key: #262b36;
+    --key-border: #363c4a;
+    --text: #e7e9ef;
+    --text-dim: #8b90a3;
+    --text-faint: #5b6070;
+    --accent: #7dd3c0;
+    --accent-dim: #3a5a53;
+    --accent-text: #06201b;
+    --danger: #e0716b;
+    --sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f3f2ee;
+      --panel: #ffffff;
+      --panel-2: #f7f6f2;
+      --key: #e6e4dd;
+      --key-border: #cfccc2;
+      --text: #1b1c20;
+      --text-dim: #5c5f6b;
+      --text-faint: #8b8e99;
+      --accent: #1f8a76;
+      --accent-dim: #cfe9e3;
+      --accent-text: #ffffff;
+      --danger: #b1443d;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f3f2ee;
+    --panel: #ffffff;
+    --panel-2: #f7f6f2;
+    --key: #e6e4dd;
+    --key-border: #cfccc2;
+    --text: #1b1c20;
+    --text-dim: #5c5f6b;
+    --text-faint: #8b8e99;
+    --accent: #1f8a76;
+    --accent-dim: #cfe9e3;
+    --accent-text: #ffffff;
+    --danger: #b1443d;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    padding-inline: 16px;
+    padding-block: 20px 48px;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  h1 { font-size: 20px; font-weight: 700; margin: 0 0 2px; letter-spacing: -0.01em; }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin: 0 0 20px; max-width: 62ch; }
+
+  .layer-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    background: var(--panel);
+    border: 1px solid var(--key-border);
+    border-radius: 12px;
+    padding: 10px;
+    margin-bottom: 18px;
+  }
+  .layer-tab {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 7px 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 52px;
+  }
+  .layer-tab .n { font-size: 14px; }
+  .layer-tab .name { font-family: var(--sans); font-weight: 500; font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-faint); }
+  .layer-tab.active { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+  .layer-tab.active .name { color: var(--accent); }
+  .layer-tab .dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 1px; }
+  .layer-tab:hover { border-color: var(--key-border); }
+
+  .status { margin-left: auto; font-size: 11px; color: var(--text-faint); font-family: var(--mono); white-space: nowrap; padding-inline: 6px; }
+  .status.saving { color: var(--accent); }
+  .status.error { color: var(--danger); }
+
+  .board-scroll { overflow-x: auto; padding: 4px 4px 12px; }
+  .board {
+    background: var(--panel);
+    border: 1px solid var(--key-border);
+    border-radius: 16px;
+    padding: 28px 22px;
+    display: flex;
+    justify-content: center;
+    min-width: 820px;
+  }
+  .half { display: flex; gap: 6px; }
+  .col { display: flex; flex-direction: column; gap: 6px; }
+
+  button.key {
+    all: unset;
+    box-sizing: border-box;
+    width: 50px;
+    height: 50px;
+    border-radius: 9px;
+    border: 1.5px solid var(--key-border);
+    background: var(--key);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    line-height: 1.1;
+    padding: 2px;
+    transition: transform 0.08s ease;
+    position: relative;
+  }
+  button.key:hover { transform: translateY(-1px); }
+  button.key:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.key.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+  button.key.modtap { border-style: dashed; }
+  button.key .lbl { pointer-events: none; }
+
+  .thumb-cluster { display: flex; gap: 8px; }
+  .thumb-cluster.left button.key:nth-child(1) { transform: rotate(-12deg) translateY(10px); }
+  .thumb-cluster.left button.key:nth-child(2) { transform: rotate(-4deg) translateY(2px); }
+  .thumb-cluster.left button.key:nth-child(3) { transform: rotate(6deg); }
+  .thumb-cluster.left button.key:hover:nth-child(1) { transform: rotate(-12deg) translateY(6px); }
+  .thumb-cluster.left button.key:hover:nth-child(2) { transform: rotate(-4deg) translateY(-2px); }
+  .thumb-cluster.left button.key:hover:nth-child(3) { transform: rotate(6deg) translateY(-4px); }
+  .thumb-cluster.right button.key:nth-child(1) { transform: rotate(-6deg); }
+  .thumb-cluster.right button.key:nth-child(2) { transform: rotate(4deg) translateY(2px); }
+  .thumb-cluster.right button.key:nth-child(3) { transform: rotate(12deg) translateY(10px); }
+  .thumb-cluster.right button.key:hover:nth-child(1) { transform: rotate(-6deg) translateY(-4px); }
+  .thumb-cluster.right button.key:hover:nth-child(2) { transform: rotate(4deg) translateY(-2px); }
+  .thumb-cluster.right button.key:hover:nth-child(3) { transform: rotate(12deg) translateY(6px); }
+
+  .legend { display: flex; gap: 16px; justify-content: center; margin-top: 18px; font-size: 11px; color: var(--text-faint); flex-wrap: wrap; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .legend i { width: 9px; height: 9px; border-radius: 3px; border: 1.5px dashed var(--key-border); display: inline-block; }
+
+  .panels { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--key-border);
+    border-radius: 14px;
+    padding: 18px;
+    flex: 1 1 340px;
+    min-width: 300px;
+  }
+  .panel h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); margin: 0 0 14px; font-weight: 600; }
+
+  .edit-target { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .swatch { width: 40px; height: 40px; border-radius: 10px; border: 1.5px solid var(--key-border); flex-shrink: 0; }
+  .edit-target .label { font-size: 13px; font-weight: 600; }
+  .edit-target .sub { font-size: 11px; color: var(--text-dim); }
+
+  .slider-row { margin-bottom: 12px; }
+  .slider-row .head { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dim); margin-bottom: 4px; font-family: var(--mono); }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+  .preset-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
+  .preset {
+    width: 30px; height: 30px; border-radius: 8px; border: 1.5px solid var(--key-border);
+    cursor: pointer; flex-shrink: 0;
+  }
+  .preset:hover { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  button.action {
+    all: unset;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    background: var(--key);
+    color: var(--text);
+    border: 1px solid var(--key-border);
+  }
+  button.action:hover { border-color: var(--accent); }
+  button.action.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  button.action.ghost { background: transparent; }
+  button.action:disabled { opacity: 0.4; cursor: default; }
+
+  .fill-row { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--panel-2); border-radius: 10px; margin-bottom: 14px; }
+  .fill-row .txt { flex: 1; }
+  .fill-row .txt .t1 { font-size: 12px; font-weight: 600; }
+  .fill-row .txt .t2 { font-size: 11px; color: var(--text-dim); }
+
+  details.csv { margin-top: 16px; }
+  details.csv summary { cursor: pointer; font-size: 12px; color: var(--text-dim); font-weight: 600; }
+  textarea.csv-out {
+    width: 100%; margin-top: 10px; background: var(--panel-2); color: var(--text-dim);
+    border: 1px solid var(--key-border); border-radius: 8px; padding: 10px;
+    font-family: var(--mono); font-size: 10.5px; line-height: 1.5; resize: vertical; min-height: 140px;
+  }
+
+  @media (max-width: 620px) {
+    .board { min-width: 780px; }
+  }
+</style>
+
+<h1>Corne Palette Editor</h1>
+<p class="subtitle">Pick per-key RGB colors for each layer of the <strong>mak3r</strong> keymap. Click one or more keys, choose a color, and it's saved live — Claude reads it back to regenerate <code>rgb_layers.csv</code>.</p>
+
+<div class="layer-bar" id="layerBar"></div>
+
+<div class="board-scroll">
+  <div class="board" id="board"></div>
+</div>
+<div class="legend">
+  <span><i style="border-style:solid;background:var(--key)"></i> unlit</span>
+  <span><i style="border-style:dashed"></i> mod-tap key</span>
+  <span>Click to select · shift-click to add to selection</span>
+</div>
+
+<div class="panels" style="margin-top:20px;">
+  <div class="panel">
+    <h2>Layer fill</h2>
+    <div class="fill-row">
+      <div class="swatch" id="fillSwatch"></div>
+      <div class="txt">
+        <div class="t1">Base wash for every key on this layer</div>
+        <div class="t2" id="fillSub">Individual key colors override this</div>
+      </div>
+      <button class="action" id="editFillBtn">Edit</button>
+    </div>
+
+    <h2>Selection</h2>
+    <div class="edit-target">
+      <div class="swatch" id="targetSwatch"></div>
+      <div>
+        <div class="label" id="targetLabel">No keys selected</div>
+        <div class="sub" id="targetSub">Click keys above, or edit the layer fill</div>
+      </div>
+    </div>
+
+    <div class="slider-row">
+      <div class="head"><span>Hue</span><span id="hVal">0</span></div>
+      <input type="range" id="hSlider" min="0" max="255" value="0">
+    </div>
+    <div class="slider-row">
+      <div class="head"><span>Saturation</span><span id="sVal">0</span></div>
+      <input type="range" id="sSlider" min="0" max="255" value="0">
+    </div>
+    <div class="slider-row">
+      <div class="head"><span>Value (brightness)</span><span id="vVal">0</span></div>
+      <input type="range" id="vSlider" min="0" max="255" value="0">
+    </div>
+
+    <div class="preset-row" id="presetRow"></div>
+
+    <div class="btn-row">
+      <button class="action primary" id="applyBtn">Apply to selection</button>
+      <button class="action ghost" id="clearBtn">Clear override</button>
+      <button class="action ghost" id="deselectBtn">Deselect all</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>This layer's keymap</h2>
+    <p style="font-size:12px;color:var(--text-dim);margin:0 0 10px;">What's actually mapped here right now, for context while you pick colors.</p>
+    <p style="font-size:12px;color:var(--text-dim);margin:0;" id="layerNote"></p>
+
+    <details class="csv">
+      <summary>View / copy CSV for this layer</summary>
+      <textarea class="csv-out" id="csvOut" readonly></textarea>
+      <div class="btn-row">
+        <button class="action" id="copyBtn">Copy to clipboard</button>
+      </div>
+    </details>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const DATA = {"layers": [{"name": "Base", "keys": [{"r": 0, "c": 0, "kc": "KC_TAB", "label": "Tab", "modtap": false}, {"r": 0, "c": 1, "kc": "KC_Q", "label": "Q", "modtap": false}, {"r": 0, "c": 2, "kc": "KC_W", "label": "W", "modtap": false}, {"r": 0, "c": 3, "kc": "KC_E", "label": "E", "modtap": false}, {"r": 0, "c": 4, "kc": "KC_R", "label": "R", "modtap": false}, {"r": 0, "c": 5, "kc": "KC_T", "label": "T", "modtap": false}, {"r": 5, "c": 5, "kc": "KC_Y", "label": "Y", "modtap": false}, {"r": 5, "c": 4, "kc": "KC_U", "label": "U", "modtap": false}, {"r": 5, "c": 3, "kc": "KC_I", "label": "I", "modtap": false}, {"r": 5, "c": 2, "kc": "KC_O", "label": "O", "modtap": false}, {"r": 5, "c": 1, "kc": "KC_P", "label": "P", "modtap": false}, {"r": 5, "c": 0, "kc": "KC_BSPC", "label": "Bksp", "modtap": false}, {"r": 1, "c": 0, "kc": "KC_ESCAPE", "label": "Esc", "modtap": false}, {"r": 1, "c": 1, "kc": "KC_A", "label": "A", "modtap": false}, {"r": 1, "c": 2, "kc": "KC_S", "label": "S", "modtap": false}, {"r": 1, "c": 3, "kc": "LCTL_T(KC_D)", "label": "D", "modtap": true}, {"r": 1, "c": 4, "kc": "KC_F", "label": "F", "modtap": false}, {"r": 1, "c": 5, "kc": "KC_G", "label": "G", "modtap": false}, {"r": 6, "c": 5, "kc": "KC_H", "label": "H", "modtap": false}, {"r": 6, "c": 4, "kc": "KC_J", "label": "J", "modtap": false}, {"r": 6, "c": 3, "kc": "RCTL_T(KC_K)", "label": "K", "modtap": true}, {"r": 6, "c": 2, "kc": "KC_L", "label": "L", "modtap": false}, {"r": 6, "c": 1, "kc": "KC_SCLN", "label": ";", "modtap": false}, {"r": 6, "c": 0, "kc": "KC_QUOTE", "label": "'", "modtap": false}, {"r": 2, "c": 0, "kc": "KC_LSFT", "label": "\u21e7", "modtap": false}, {"r": 2, "c": 1, "kc": "KC_Z", "label": "Z", "modtap": false}, {"r": 2, "c": 2, "kc": "KC_X", "label": "X", "modtap": false}, {"r": 2, "c": 3, "kc": "KC_C", "label": "C", "modtap": false}, {"r": 2, "c": 4, "kc": "KC_V", "label": "V", "modtap": false}, {"r": 2, "c": 5, "kc": "KC_B", "label": "B", "modtap": false}, {"r": 7, "c": 5, "kc": "KC_N", "label": "N", "modtap": false}, {"r": 7, "c": 4, "kc": "KC_M", "label": "M", "modtap": false}, {"r": 7, "c": 3, "kc": "KC_COMMA", "label": ",", "modtap": false}, {"r": 7, "c": 2, "kc": "KC_DOT", "label": ".", "modtap": false}, {"r": 7, "c": 1, "kc": "KC_SLASH", "label": "/", "modtap": false}, {"r": 7, "c": 0, "kc": "KC_RSFT", "label": "\u21e7", "modtap": false}, {"r": 3, "c": 3, "kc": "KC_LGUI", "label": "\u2318", "modtap": false}, {"r": 3, "c": 4, "kc": "MO(1)", "label": "MO1", "modtap": false}, {"r": 3, "c": 5, "kc": "KC_SPACE", "label": "Space", "modtap": false}, {"r": 8, "c": 5, "kc": "KC_ENTER", "label": "Enter", "modtap": false}, {"r": 8, "c": 4, "kc": "MO(2)", "label": "MO2", "modtap": false}, {"r": 8, "c": 3, "kc": "KC_RGUI", "label": "\u2318", "modtap": false}]}, {"name": "Symbols", "keys": [{"r": 0, "c": 0, "kc": "KC_GRAVE", "label": "`", "modtap": false}, {"r": 0, "c": 1, "kc": "KC_KP_1", "label": "1", "modtap": false}, {"r": 0, "c": 2, "kc": "KC_KP_2", "label": "2", "modtap": false}, {"r": 0, "c": 3, "kc": "KC_KP_3", "label": "3", "modtap": false}, {"r": 0, "c": 4, "kc": "KC_KP_4", "label": "4", "modtap": false}, {"r": 0, "c": 5, "kc": "KC_KP_5", "label": "5", "modtap": false}, {"r": 5, "c": 5, "kc": "KC_KP_6", "label": "6", "modtap": false}, {"r": 5, "c": 4, "kc": "KC_KP_7", "label": "7", "modtap": false}, {"r": 5, "c": 3, "kc": "KC_KP_8", "label": "8", "modtap": false}, {"r": 5, "c": 2, "kc": "KC_KP_9", "label": "9", "modtap": false}, {"r": 5, "c": 1, "kc": "KC_KP_0", "label": "0", "modtap": false}, {"r": 5, "c": 0, "kc": "KC_DELETE", "label": "Del", "modtap": false}, {"r": 1, "c": 0, "kc": "LSFT(KC_GRAVE)", "label": "\u21e7`", "modtap": false}, {"r": 1, "c": 1, "kc": "LSFT(KC_1)", "label": "\u21e71", "modtap": false}, {"r": 1, "c": 2, "kc": "LSFT(KC_2)", "label": "\u21e72", "modtap": false}, {"r": 1, "c": 3, "kc": "LSFT(KC_3)", "label": "\u21e73", "modtap": false}, {"r": 1, "c": 4, "kc": "LSFT(KC_4)", "label": "\u21e74", "modtap": false}, {"r": 1, "c": 5, "kc": "LSFT(KC_5)", "label": "\u21e75", "modtap": false}, {"r": 6, "c": 5, "kc": "LSFT(KC_6)", "label": "\u21e76", "modtap": false}, {"r": 6, "c": 4, "kc": "LSFT(KC_7)", "label": "\u21e77", "modtap": false}, {"r": 6, "c": 3, "kc": "LSFT(KC_8)", "label": "\u21e78", "modtap": false}, {"r": 6, "c": 2, "kc": "LSFT(KC_9)", "label": "\u21e79", "modtap": false}, {"r": 6, "c": 1, "kc": "LSFT(KC_0)", "label": "\u21e70", "modtap": false}, {"r": 6, "c": 0, "kc": "KC_BSLS", "label": "\\", "modtap": false}, {"r": 2, "c": 0, "kc": "KC_LSFT", "label": "\u21e7", "modtap": false}, {"r": 2, "c": 1, "kc": "KC_KP_MINUS", "label": "-", "modtap": false}, {"r": 2, "c": 2, "kc": "KC_KP_EQUAL", "label": "=", "modtap": false}, {"r": 2, "c": 3, "kc": "KC_LBRC", "label": "[", "modtap": false}, {"r": 2, "c": 4, "kc": "KC_RBRC", "label": "]", "modtap": false}, {"r": 2, "c": 5, "kc": "LSFT(KC_MINUS)", "label": "\u21e7-", "modtap": false}, {"r": 7, "c": 5, "kc": "LSFT(KC_EQUAL)", "label": "\u21e7=", "modtap": false}, {"r": 7, "c": 4, "kc": "LSFT(KC_LBRC)", "label": "\u21e7[", "modtap": false}, {"r": 7, "c": 3, "kc": "LSFT(KC_RBRC)", "label": "\u21e7]", "modtap": false}, {"r": 7, "c": 2, "kc": "LSFT(KC_BSLS)", "label": "\u21e7\\", "modtap": false}, {"r": 7, "c": 1, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 7, "c": 0, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 3, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 3, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 3, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 4, "kc": "OSL(3)", "label": "OSL3", "modtap": false}, {"r": 8, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}]}, {"name": "Nav", "keys": [{"r": 0, "c": 0, "kc": "LGUI(KC_Z)", "label": "\u2318Z", "modtap": false}, {"r": 0, "c": 1, "kc": "LGUI(KC_X)", "label": "\u2318X", "modtap": false}, {"r": 0, "c": 2, "kc": "LGUI(KC_C)", "label": "\u2318C", "modtap": false}, {"r": 0, "c": 3, "kc": "LGUI(KC_V)", "label": "\u2318V", "modtap": false}, {"r": 0, "c": 4, "kc": "LGUI(KC_R)", "label": "\u2318R", "modtap": false}, {"r": 0, "c": 5, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 5, "c": 5, "kc": "KC_HOME", "label": "Home", "modtap": false}, {"r": 5, "c": 4, "kc": "KC_PGDN", "label": "PgDn", "modtap": false}, {"r": 5, "c": 3, "kc": "KC_PGUP", "label": "PgUp", "modtap": false}, {"r": 5, "c": 2, "kc": "KC_END", "label": "End", "modtap": false}, {"r": 5, "c": 1, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 5, "c": 0, "kc": "KC_DELETE", "label": "Del", "modtap": false}, {"r": 1, "c": 0, "kc": "KC_LALT", "label": "\u2325", "modtap": false}, {"r": 1, "c": 1, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 1, "c": 2, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 1, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 4, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 1, "c": 5, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 6, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 4, "kc": "KC_LEFT", "label": "\u2190", "modtap": false}, {"r": 6, "c": 3, "kc": "KC_DOWN", "label": "\u2193", "modtap": false}, {"r": 6, "c": 2, "kc": "KC_UP", "label": "\u2191", "modtap": false}, {"r": 6, "c": 1, "kc": "KC_RIGHT", "label": "\u2192", "modtap": false}, {"r": 6, "c": 0, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 2, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 1, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 2, "c": 2, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 2, "c": 3, "kc": "RCTL(KC_LEFT)", "label": "\u2303\u2190", "modtap": false}, {"r": 2, "c": 4, "kc": "LCTL(KC_RIGHT)", "label": "\u2303\u2192", "modtap": false}, {"r": 2, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 5, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 7, "c": 4, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 7, "c": 3, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 7, "c": 2, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 7, "c": 1, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 7, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 3, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 3, "c": 4, "kc": "OSL(3)", "label": "OSL3", "modtap": false}, {"r": 3, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}]}, {"name": "Function", "keys": [{"r": 0, "c": 0, "kc": "RM_TOGG", "label": "RGBTOGG", "modtap": false}, {"r": 0, "c": 1, "kc": "KC_F1", "label": "F1", "modtap": false}, {"r": 0, "c": 2, "kc": "KC_F2", "label": "F2", "modtap": false}, {"r": 0, "c": 3, "kc": "KC_F3", "label": "F3", "modtap": false}, {"r": 0, "c": 4, "kc": "KC_F4", "label": "F4", "modtap": false}, {"r": 0, "c": 5, "kc": "KC_F5", "label": "F5", "modtap": false}, {"r": 5, "c": 5, "kc": "KC_F6", "label": "F6", "modtap": false}, {"r": 5, "c": 4, "kc": "KC_F7", "label": "F7", "modtap": false}, {"r": 5, "c": 3, "kc": "KC_F8", "label": "F8", "modtap": false}, {"r": 5, "c": 2, "kc": "KC_F9", "label": "F9", "modtap": false}, {"r": 5, "c": 1, "kc": "KC_F10", "label": "F10", "modtap": false}, {"r": 5, "c": 0, "kc": "QK_BOOT", "label": "Boot", "modtap": false}, {"r": 1, "c": 0, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 1, "c": 1, "kc": "KC_F11", "label": "F11", "modtap": false}, {"r": 1, "c": 2, "kc": "KC_F12", "label": "F12", "modtap": false}, {"r": 1, "c": 3, "kc": "OSL(4)", "label": "OSL4", "modtap": false}, {"r": 1, "c": 4, "kc": "SGUI(KC_4)", "label": "\u21e7\u23184", "modtap": false}, {"r": 1, "c": 5, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 6, "c": 5, "kc": "KC_VOLD", "label": "Vol-", "modtap": false}, {"r": 6, "c": 4, "kc": "KC_VOLU", "label": "Vol+", "modtap": false}, {"r": 6, "c": 3, "kc": "KC_MUTE", "label": "Mute", "modtap": false}, {"r": 6, "c": 2, "kc": "QK_CAPS_WORD_TOGGLE", "label": "CapsWrd", "modtap": false}, {"r": 6, "c": 1, "kc": "TG(4)", "label": "TG4", "modtap": false}, {"r": 6, "c": 0, "kc": "TG(5)", "label": "TG5", "modtap": false}, {"r": 2, "c": 0, "kc": "RM_NEXT", "label": "RGBNEXT", "modtap": false}, {"r": 2, "c": 1, "kc": "RM_VALD", "label": "RGBVALD", "modtap": false}, {"r": 2, "c": 2, "kc": "RM_VALU", "label": "RGBVALU", "modtap": false}, {"r": 2, "c": 3, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 2, "c": 4, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 2, "c": 5, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 7, "c": 5, "kc": "KC_MRWD", "label": "Rwd", "modtap": false}, {"r": 7, "c": 4, "kc": "KC_MPLY", "label": "Play", "modtap": false}, {"r": 7, "c": 3, "kc": "KC_MFFD", "label": "Ffd", "modtap": false}, {"r": 7, "c": 2, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 7, "c": 1, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 7, "c": 0, "kc": "KC_NO", "label": "\u00b7", "modtap": false}, {"r": 3, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 3, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 3, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}]}, {"name": "Return", "keys": [{"r": 0, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 3, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 3, "c": 4, "kc": "TO(0)", "label": "TO0", "modtap": false}, {"r": 3, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 4, "kc": "TO(0)", "label": "TO0", "modtap": false}, {"r": 8, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}]}, {"name": "Return2", "keys": [{"r": 0, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 3, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 3, "c": 4, "kc": "TO(0)", "label": "TO0", "modtap": false}, {"r": 3, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 4, "kc": "TO(0)", "label": "TO0", "modtap": false}, {"r": 8, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}]}, {"name": "Unused", "keys": [{"r": 0, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 3, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 3, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 3, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}]}, {"name": "Unused", "keys": [{"r": 0, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 0, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 5, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 1, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 6, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 2, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 2, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 1, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 7, "c": 0, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 3, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 3, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 3, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 5, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 4, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}, {"r": 8, "c": 3, "kc": "KC_TRNS", "label": "\u2015", "modtap": false}]}], "seed": {"0": {"fill": null, "overrides": {"0,0": [152, 255, 255], "0,1": [74, 255, 255], "0,2": [74, 255, 255], "0,3": [74, 255, 255], "0,4": [74, 255, 255], "0,5": [74, 255, 255], "1,0": [152, 255, 255], "1,1": [74, 255, 255], "1,2": [74, 255, 255], "1,3": [74, 255, 255], "1,4": [188, 128, 255], "1,5": [74, 255, 255], "2,0": [152, 255, 255], "2,1": [74, 255, 255], "2,2": [74, 255, 255], "2,3": [74, 255, 255], "2,4": [74, 255, 255], "2,5": [74, 255, 255], "3,3": [188, 255, 255], "3,4": [188, 255, 255], "3,5": [188, 255, 255], "5,0": [152, 255, 255], "5,1": [74, 255, 255], "5,2": [74, 255, 255], "5,3": [74, 255, 255], "5,4": [74, 255, 255], "5,5": [74, 255, 255], "6,0": [152, 255, 255], "6,1": [74, 255, 255], "6,2": [74, 255, 255], "6,3": [74, 255, 255], "6,4": [188, 128, 255], "6,5": [74, 255, 255], "7,0": [152, 255, 255], "7,1": [74, 255, 255], "7,2": [74, 255, 255], "7,3": [74, 255, 255], "7,4": [74, 255, 255], "7,5": [74, 255, 255], "8,3": [188, 255, 255], "8,4": [188, 255, 255], "8,5": [188, 255, 255]}}, "1": {"fill": null, "overrides": {"0,0": [152, 255, 255], "0,1": [152, 255, 255], "0,2": [152, 255, 255], "0,3": [152, 255, 255], "0,4": [152, 255, 255], "0,5": [152, 255, 255], "1,0": [152, 255, 255], "1,1": [152, 255, 255], "1,2": [152, 255, 255], "1,3": [152, 255, 255], "1,4": [152, 255, 255], "1,5": [152, 255, 255], "2,0": [152, 255, 255], "2,1": [152, 255, 255], "2,2": [152, 255, 255], "2,3": [152, 255, 255], "2,4": [152, 255, 255], "2,5": [152, 255, 255], "5,0": [152, 255, 255], "5,1": [152, 255, 255], "5,2": [152, 255, 255], "5,3": [152, 255, 255], "5,4": [152, 255, 255], "5,5": [152, 255, 255], "6,0": [152, 255, 255], "6,1": [152, 255, 255], "6,2": [152, 255, 255], "6,3": [152, 255, 255], "6,4": [152, 255, 255], "6,5": [152, 255, 255], "7,2": [152, 255, 255], "7,3": [152, 255, 255], "7,4": [152, 255, 255], "7,5": [152, 255, 255], "8,4": [188, 255, 255]}}, "2": {"fill": [152, 255, 255], "overrides": {}}, "3": {"fill": [152, 255, 255], "overrides": {}}, "4": {"fill": [152, 255, 255], "overrides": {}}, "5": {"fill": [152, 255, 255], "overrides": {}}, "6": {"fill": [152, 255, 255], "overrides": {}}, "7": {"fill": [152, 255, 255], "overrides": {}}}};
+  const LAYERS = DATA.layers;
+  const LAYER_NOTES = [
+    "Real colors, fully designed.",
+    "Real colors, partially designed (active keys blue, OSL thumb purple).",
+    "Placeholder — solid blue fill, not designed yet.",
+    "Placeholder — solid blue fill, not designed yet.",
+    "Placeholder — solid blue fill, not designed yet.",
+    "Placeholder — solid blue fill, not designed yet.",
+    "Placeholder, unused layer.",
+    "Placeholder, unused layer."
+  ];
+
+  const LEFT_COLS_VISUAL = [0, 1, 2, 3, 4, 5];
+  const RIGHT_COLS_VISUAL = [5, 4, 3, 2, 1, 0];
+  const COL_OFFSET = { 0: 24, 1: 20, 2: 8, 3: 0, 4: 6, 5: 16 };
+  const LEFT_ROWS = [0, 1, 2];
+  const RIGHT_ROWS = [5, 6, 7];
+  const LEFT_THUMB = [[3, 3], [3, 4], [3, 5]];
+  const RIGHT_THUMB = [[8, 5], [8, 4], [8, 3]];
+
+  const PRESETS = [
+    [152, 255, 255], [74, 255, 255], [188, 255, 255], [188, 128, 255],
+    [21, 255, 255], [0, 255, 255], [128, 255, 255], [0, 0, 0]
+  ];
+
+  let state = null;         // { "0": {fill,overrides}, ... } current in-memory state per layer
+  let currentLayer = 0;
+  let selection = new Set(); // "r,c" strings
+  let db = null;
+  let dbReady = false;
+  const saveTimers = {};
+
+  function hsv2rgb(h, s, v) {
+    const hh = (h / 255) * 360, ss = s / 255, vv = v / 255;
+    const c = vv * ss, x = c * (1 - Math.abs(((hh / 60) % 2) - 1)), m = vv - c;
+    let r, g, b;
+    if (hh < 60) { r = c; g = x; b = 0; }
+    else if (hh < 120) { r = x; g = c; b = 0; }
+    else if (hh < 180) { r = 0; g = c; b = x; }
+    else if (hh < 240) { r = 0; g = x; b = c; }
+    else if (hh < 300) { r = x; g = 0; b = c; }
+    else { r = c; g = 0; b = x; }
+    return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
+  }
+
+  function rgbCss(hsv) {
+    const [r, g, b] = hsv2rgb(hsv[0], hsv[1], hsv[2]);
+    return `rgb(${r},${g},${b})`;
+  }
+
+  function textOn(hsv) {
+    const [r, g, b] = hsv2rgb(hsv[0], hsv[1], hsv[2]);
+    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+    return lum > 150 ? "#14151a" : "#f3f4f8";
+  }
+
+  function keyLookup(layerIdx) {
+    const map = {};
+    for (const k of LAYERS[layerIdx].keys) map[k.r + "," + k.c] = k;
+    return map;
+  }
+
+  function effectiveColor(layerIdx, r, c) {
+    const s = state[layerIdx];
+    const ov = s.overrides[r + "," + c];
+    if (ov) return ov;
+    if (s.fill) return s.fill;
+    return [0, 0, 0];
+  }
+
+  function isOff(hsv) { return hsv[0] === 0 && hsv[1] === 0 && hsv[2] === 0; }
+
+  // ---------- rendering ----------
+
+  function buildLayerBar() {
+    const bar = document.getElementById("layerBar");
+    bar.innerHTML = "";
+    LAYERS.forEach((l, i) => {
+      const btn = document.createElement("button");
+      btn.className = "layer-tab" + (i === currentLayer ? " active" : "");
+      btn.innerHTML = `<span class="n">${i}</span><span class="name">${l.name}</span>`;
+      btn.addEventListener("click", () => { currentLayer = i; selection.clear(); renderAll(); });
+      bar.appendChild(btn);
+    });
+    const status = document.createElement("div");
+    status.className = "status";
+    status.id = "statusEl";
+    status.textContent = dbReady ? "saved" : "local only (db unavailable)";
+    bar.appendChild(status);
+  }
+
+  function renderKeyButton(r, c) {
+    const km = keyLookup(currentLayer)[r + "," + c];
+    const hsv = effectiveColor(currentLayer, r, c);
+    const btn = document.createElement("button");
+    btn.className = "key" + (isOff(hsv) ? "" : "") + (km && km.modtap ? " modtap" : "");
+    btn.dataset.r = r; btn.dataset.c = c;
+    btn.style.background = isOff(hsv) ? "var(--key)" : rgbCss(hsv);
+    btn.style.color = isOff(hsv) ? "var(--text-dim)" : textOn(hsv);
+    if (selection.has(r + "," + c)) btn.classList.add("selected");
+    const lbl = document.createElement("span");
+    lbl.className = "lbl";
+    lbl.textContent = km ? km.label : "?";
+    btn.appendChild(lbl);
+    btn.addEventListener("click", (e) => {
+      const key = r + "," + c;
+      if (!e.shiftKey) selection.clear();
+      if (selection.has(key)) selection.delete(key); else selection.add(key);
+      renderBoard();
+      syncEditorFromSelection();
+    });
+    return btn;
+  }
+
+  function buildHalf(colsVisual, rows, thumbCoords, thumbClass) {
+    const half = document.createElement("div");
+    half.className = "half";
+    colsVisual.forEach((matrixCol) => {
+      const col = document.createElement("div");
+      col.className = "col";
+      col.style.marginTop = COL_OFFSET[matrixCol] + "px";
+      rows.forEach((row) => col.appendChild(renderKeyButton(row, matrixCol)));
+      half.appendChild(col);
+    });
+    return half;
+  }
+
+  function renderBoard() {
+    const board = document.getElementById("board");
+    board.innerHTML = "";
+
+    const wrap = document.createElement("div");
+    wrap.style.display = "flex";
+    wrap.style.flexDirection = "column";
+    wrap.style.gap = "0";
+
+    const HALF_GAP = 100;
+
+    const mainRow = document.createElement("div");
+    mainRow.style.display = "flex";
+    mainRow.style.justifyContent = "center";
+    mainRow.style.gap = HALF_GAP + "px";
+    mainRow.appendChild(buildHalf(LEFT_COLS_VISUAL, LEFT_ROWS));
+    mainRow.appendChild(buildHalf(RIGHT_COLS_VISUAL, RIGHT_ROWS));
+    wrap.appendChild(mainRow);
+
+    const thumbRow = document.createElement("div");
+    thumbRow.style.display = "flex";
+    thumbRow.style.justifyContent = "center";
+    thumbRow.style.gap = HALF_GAP + "px";
+    thumbRow.style.marginTop = "18px";
+
+    const leftThumb = document.createElement("div");
+    leftThumb.className = "thumb-cluster left";
+    LEFT_THUMB.forEach(([r, c]) => leftThumb.appendChild(renderKeyButton(r, c)));
+
+    const rightThumb = document.createElement("div");
+    rightThumb.className = "thumb-cluster right";
+    RIGHT_THUMB.forEach(([r, c]) => rightThumb.appendChild(renderKeyButton(r, c)));
+
+    thumbRow.appendChild(leftThumb);
+    thumbRow.appendChild(rightThumb);
+    wrap.appendChild(thumbRow);
+
+    board.appendChild(wrap);
+  }
+
+  function renderFillSwatch() {
+    const fill = state[currentLayer].fill;
+    const el = document.getElementById("fillSwatch");
+    const sub = document.getElementById("fillSub");
+    if (fill) {
+      el.style.background = rgbCss(fill);
+      sub.textContent = `HSV ${fill[0]}, ${fill[1]}, ${fill[2]} — individual keys can still override this`;
+    } else {
+      el.style.background = "var(--key)";
+      sub.textContent = "No fill set (unlit by default) — individual keys can still override this";
+    }
+  }
+
+  function renderPresets() {
+    const row = document.getElementById("presetRow");
+    row.innerHTML = "";
+    PRESETS.forEach((hsv) => {
+      const sw = document.createElement("div");
+      sw.className = "preset";
+      sw.style.background = rgbCss(hsv);
+      sw.title = `HSV ${hsv[0]}, ${hsv[1]}, ${hsv[2]}`;
+      sw.addEventListener("click", () => {
+        setSliders(hsv);
+        applyCurrentSlidersLive();
+      });
+      row.appendChild(sw);
+    });
+  }
+
+  function renderCsv() {
+    const s = state[currentLayer];
+    let lines = [];
+    if (s.fill) lines.push(`${currentLayer},*,*,${s.fill[0]},${s.fill[1]},${s.fill[2]}`);
+    Object.keys(s.overrides).sort().forEach((k) => {
+      const [r, c] = k.split(",");
+      const hsv = s.overrides[k];
+      lines.push(`${currentLayer},${r},${c},${hsv[0]},${hsv[1]},${hsv[2]}`);
+    });
+    document.getElementById("csvOut").value = lines.length ? lines.join("\n") : "# nothing set on this layer yet";
+  }
+
+  function renderAll() {
+    buildLayerBar();
+    renderBoard();
+    renderFillSwatch();
+    renderPresets();
+    renderCsv();
+    document.getElementById("layerNote").textContent = LAYER_NOTES[currentLayer];
+    syncEditorFromSelection();
+  }
+
+  // ---------- editor ----------
+
+  function setSliders(hsv) {
+    document.getElementById("hSlider").value = hsv[0];
+    document.getElementById("sSlider").value = hsv[1];
+    document.getElementById("vSlider").value = hsv[2];
+    document.getElementById("hVal").textContent = hsv[0];
+    document.getElementById("sVal").textContent = hsv[1];
+    document.getElementById("vVal").textContent = hsv[2];
+    updateTargetSwatch(hsv);
+  }
+
+  function currentSliderHsv() {
+    return [
+      parseInt(document.getElementById("hSlider").value, 10),
+      parseInt(document.getElementById("sSlider").value, 10),
+      parseInt(document.getElementById("vSlider").value, 10),
+    ];
+  }
+
+  function updateTargetSwatch(hsv) {
+    document.getElementById("targetSwatch").style.background = rgbCss(hsv);
+  }
+
+  function syncEditorFromSelection() {
+    const label = document.getElementById("targetLabel");
+    const sub = document.getElementById("targetSub");
+    const applyBtn = document.getElementById("applyBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    if (selection.size === 0) {
+      label.textContent = "No keys selected";
+      sub.textContent = "Click keys above, or use “Edit” on the layer fill";
+      applyBtn.disabled = true;
+      clearBtn.disabled = true;
+      updateTargetSwatch(state[currentLayer].fill || [0, 0, 0]);
+      return;
+    }
+    applyBtn.disabled = false;
+    clearBtn.disabled = false;
+    label.textContent = selection.size === 1 ? "1 key selected" : selection.size + " keys selected";
+    const km = keyLookup(currentLayer);
+    const names = [...selection].map((k) => (km[k] ? km[k].label : "?")).slice(0, 6).join(", ");
+    sub.textContent = names + (selection.size > 6 ? "…" : "");
+    const first = [...selection][0].split(",").map(Number);
+    setSliders(effectiveColor(currentLayer, first[0], first[1]));
+  }
+
+  let editingFill = false;
+
+  document.getElementById("editFillBtn").addEventListener("click", () => {
+    selection.clear();
+    editingFill = true;
+    renderBoard();
+    const label = document.getElementById("targetLabel");
+    const sub = document.getElementById("targetSub");
+    label.textContent = "Editing layer fill";
+    sub.textContent = "Applies to every key without its own override";
+    document.getElementById("applyBtn").disabled = false;
+    document.getElementById("clearBtn").disabled = false;
+    setSliders(state[currentLayer].fill || [0, 0, 0]);
+  });
+
+  function applyCurrentSlidersLive() {
+    const hsv = currentSliderHsv();
+    if (editingFill) {
+      state[currentLayer].fill = hsv;
+      editingFill = false;
+    } else if (selection.size > 0) {
+      selection.forEach((k) => { state[currentLayer].overrides[k] = hsv; });
+    } else {
+      return;
+    }
+    persistLayer(currentLayer);
+    renderBoard();
+    renderFillSwatch();
+    renderCsv();
+  }
+
+  ["hSlider", "sSlider", "vSlider"].forEach((id) => {
+    document.getElementById(id).addEventListener("input", (e) => {
+      document.getElementById(id[0] + "Val").textContent = e.target.value;
+      updateTargetSwatch(currentSliderHsv());
+    });
+    document.getElementById(id).addEventListener("change", () => {
+      applyCurrentSlidersLive();
+    });
+  });
+
+  document.getElementById("applyBtn").addEventListener("click", applyCurrentSlidersLive);
+
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    if (editingFill) {
+      state[currentLayer].fill = null;
+      editingFill = false;
+    } else {
+      selection.forEach((k) => { delete state[currentLayer].overrides[k]; });
+    }
+    persistLayer(currentLayer);
+    renderBoard();
+    renderFillSwatch();
+    renderCsv();
+    syncEditorFromSelection();
+  });
+
+  document.getElementById("deselectBtn").addEventListener("click", () => {
+    selection.clear();
+    editingFill = false;
+    renderBoard();
+    syncEditorFromSelection();
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", async () => {
+    const text = document.getElementById("csvOut").value;
+    try {
+      await navigator.clipboard.writeText(text);
+      const btn = document.getElementById("copyBtn");
+      const old = btn.textContent;
+      btn.textContent = "Copied!";
+      setTimeout(() => { btn.textContent = old; }, 1400);
+    } catch (err) {
+      document.getElementById("csvOut").select();
+    }
+  });
+
+  // ---------- persistence ----------
+
+  function setStatus(text, cls) {
+    const el = document.getElementById("statusEl");
+    if (!el) return;
+    el.textContent = text;
+    el.className = "status" + (cls ? " " + cls : "");
+  }
+
+  function persistLayer(layerIdx) {
+    if (!db) { setStatus("local only (db unavailable)"); return; }
+    clearTimeout(saveTimers[layerIdx]);
+    saveTimers[layerIdx] = setTimeout(async () => {
+      setStatus("saving…", "saving");
+      try {
+        await db.doc("palette/layer-" + layerIdx).set({
+          fill: state[layerIdx].fill,
+          overrides: state[layerIdx].overrides,
+          updatedAt: Date.now(),
+        });
+        setStatus("saved");
+      } catch (err) {
+        setStatus("save failed", "error");
+      }
+    }, 400);
+  }
+
+  async function loadState() {
+    state = {};
+    for (let i = 0; i < 8; i++) {
+      state[i] = JSON.parse(JSON.stringify(DATA.seed[i]));
+    }
+    if (!db) return;
+    try {
+      const snap = await db.collection("palette").get();
+      snap.docs.forEach((d) => {
+        const data = d.data();
+        if (!data) return;
+        const idx = parseInt(d.id.replace("layer-", ""), 10);
+        if (Number.isFinite(idx) && idx >= 0 && idx < 8) {
+          state[idx] = { fill: data.fill || null, overrides: data.overrides || {} };
+        }
+      });
+      dbReady = true;
+    } catch (err) {
+      dbReady = false;
+    }
+  }
+
+  async function init() {
+    try {
+      db = (await claude.use("db")) || null;
+    } catch (err) {
+      db = null;
+    }
+    await loadState();
+    renderAll();
+  }
+
+  init();
+})();
+</script>
