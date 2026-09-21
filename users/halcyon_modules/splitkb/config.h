@@ -6,6 +6,9 @@
 #define HALCYON_ENABLE
 
 #define SPLIT_TRANSACTION_IDS_KB MODULE_SYNC
+// Caps Word has no built-in split sync (unlike the SPLIT_*_ENABLE flags
+// below) -- caps_word_sync.c sends it over this transaction.
+#define SPLIT_TRANSACTION_IDS_USER RPC_ID_CAPS_WORD
 
 #define SPLIT_POINTING_ENABLE
 #define POINTING_DEVICE_COMBINED

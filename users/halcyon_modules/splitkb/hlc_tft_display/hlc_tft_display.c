@@ -8,6 +8,10 @@
 
 #if defined(CAPS_WORD_ENABLE)
 #    include "caps_word.h"
+// Defined in caps_word_sync.c -- is_caps_word_on() alone only reflects
+// reality on whichever half is split master; this is the slave-safe
+// version. See config.h's SPLIT_TRANSACTION_IDS_USER comment.
+extern bool is_caps_word_active_synced(void);
 #endif
 
 // Fonts mono2
@@ -194,7 +198,7 @@ void update_display(void) {
     }
 
 #if defined(CAPS_WORD_ENABLE)
-    bool caps_word_active = is_caps_word_on();
+    bool caps_word_active = is_caps_word_active_synced();
 #else
     bool caps_word_active = false;
 #endif

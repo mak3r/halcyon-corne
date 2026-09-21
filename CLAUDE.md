@@ -47,11 +47,17 @@ Per-key/per-layer RGB colors are **data-driven**, not hand-written C:
 - `rgb_layers.csv` — the source of truth. One row per lit LED, keyed by `layer,row,col` (same 10×6 matrix coordinates as `keymap.json`), plus `h,s,v`. Supports `*` wildcards for row/col to fill a whole layer or row at once. Unlisted positions default to off.
 - `generate_ledmap.py` — reads the CSV and emits `ledmap.c` (the actual `ledmap[][RGB_MATRIX_LED_COUNT][3]` array + `set_layer_color()`/`rgb_matrix_indicators_user()` hooks, following the pattern from `~/projects/halcyon/zsa_moonlander/keymap.c:91-128`, adapted by key role rather than literal LED index since the two boards' physical layouts differ).
 - After editing `rgb_layers.csv`, run `python3 generate_ledmap.py` and commit the regenerated `ledmap.c` — the firmware build itself stays fully static, no Python involved at build/CI time.
-- Only layer 0 (fully) and layer 1 (partially) have real color intent so far; layers 2-7 are a solid-blue placeholder pending further design.
+- Layers 0-3 have real designed colors (interactively, via the "Corne Palette Editor" Artifact tool — a per-key color picker matching the physical layout, backed by an `artifact` `db` Claude reads back to regenerate this CSV); layers 4-7 are a solid-blue placeholder pending further design.
 
 This CSV-based approach is intentionally chosen to stay compatible with a possible future Oryx-like editor UI: both `keymap.json` (keycodes) and `rgb_layers.csv` (colors) are plain, structured formats a future tool could read/write directly, regenerating `ledmap.c` and triggering a rebuild — no architecture change needed to support that later.
 
 Stock `vial_hlc_legacy` targets remain in `qmk.json` as the permanent known-good comparison.
+
+## Split state sync gotchas
+
+`CAPS_WORD_ENABLE` defaults to `yes` for every Vial keymap here (`builddefs/build_vial.mk`'s `?=` default), not just `mak3r` — so any code gated on `#if defined(CAPS_WORD_ENABLE)` compiles for the stock keymaps too, even without an explicit `CAPS_WORD_ENABLE = yes` in their `rules.mk`. Don't assume a feature flag is keymap-specific just because one keymap's `rules.mk` sets it explicitly.
+
+QMK syncs `layer_state` and host LED state (real Caps/Num/Scroll Lock) across the split link automatically (`SPLIT_LAYER_STATE_ENABLE`/`SPLIT_LED_STATE_ENABLE`, both set in `users/halcyon_modules/splitkb/config.h`) — but has **no equivalent for Caps Word** or other custom quantum-feature state. A function like `is_caps_word_on()` only reflects reality on whichever half is currently the split master; calling it directly from module code (e.g. the TFT display, which can end up on either physical half depending on which side is plugged into USB) silently shows stale/wrong state on the slave half. Fix pattern: a small `SPLIT_TRANSACTION_IDS_USER` transaction (see `users/halcyon_modules/splitkb/caps_word_sync.c`) that the master pushes over on change, consumed via a `..._synced()` wrapper instead of the raw getter. This lives at the **shared module level** (`users/halcyon_modules/splitkb/`), not inside any one keymap — since `CAPS_WORD_ENABLE` applies to all keymaps by default, code depending on it needs to be available to all of them too, or the stock keymaps fail to link.
 
 ## Commit standards
 
