@@ -6,6 +6,10 @@
 
 #include "hardware/structs/rosc.h"
 
+#if defined(CAPS_WORD_ENABLE)
+#    include "caps_word.h"
+#endif
+
 // Fonts mono2
 #include "graphics/fonts/Retron2000-27.qff.h"
 #include "graphics/fonts/Retron2000-underline-27.qff.h"
@@ -40,6 +44,7 @@ painter_device_t lcd_surface;
 
 led_t last_led_usb_state = {0};
 layer_state_t last_layer_state = {0};
+bool last_caps_active = false;
 
 #define GRID_WIDTH 27
 #define GRID_HEIGHT 48
@@ -188,14 +193,22 @@ void update_display(void) {
         Retron27_underline = qp_load_font_mem(font_Retron2000_underline_27);
     }
 
-    if(last_led_usb_state.raw != host_keyboard_led_state().raw || first_run_led == false) {
+#if defined(CAPS_WORD_ENABLE)
+    bool caps_word_active = is_caps_word_on();
+#else
+    bool caps_word_active = false;
+#endif
+    bool caps_active = host_keyboard_led_state().caps_lock || caps_word_active;
+
+    if(last_led_usb_state.raw != host_keyboard_led_state().raw || caps_active != last_caps_active || first_run_led == false) {
         led_t led_usb_state = host_keyboard_led_state();
 
-        led_usb_state.caps_lock   ? qp_drawtext_recolor(lcd_surface, 5, LCD_HEIGHT - Retron27->line_height * 3 - 15, Retron27_underline, caps,   HSV_CAPS_ON,   HSV_BLACK) : qp_drawtext_recolor(lcd_surface, 5, LCD_HEIGHT - Retron27->line_height * 3 - 15, Retron27, caps,   HSV_CAPS_OFF,   HSV_BLACK);
+        caps_active               ? qp_drawtext_recolor(lcd_surface, 5, LCD_HEIGHT - Retron27->line_height * 3 - 15, Retron27_underline, caps,   HSV_CAPS_ON,   HSV_BLACK) : qp_drawtext_recolor(lcd_surface, 5, LCD_HEIGHT - Retron27->line_height * 3 - 15, Retron27, caps,   HSV_CAPS_OFF,   HSV_BLACK);
         led_usb_state.num_lock    ? qp_drawtext_recolor(lcd_surface, 5, LCD_HEIGHT - Retron27->line_height * 2 - 10, Retron27_underline, num,    HSV_NUM_ON,    HSV_BLACK) : qp_drawtext_recolor(lcd_surface, 5, LCD_HEIGHT - Retron27->line_height * 2 - 10, Retron27, num,    HSV_NUM_OFF,    HSV_BLACK);
         led_usb_state.scroll_lock ? qp_drawtext_recolor(lcd_surface, 5, LCD_HEIGHT - Retron27->line_height - 5,      Retron27_underline, scroll, HSV_SCROLL_ON, HSV_BLACK) : qp_drawtext_recolor(lcd_surface, 5, LCD_HEIGHT - Retron27->line_height - 5,      Retron27, scroll, HSV_SCROLL_OFF, HSV_BLACK);
 
         last_led_usb_state = led_usb_state;
+        last_caps_active = caps_active;
         first_run_led = true;
     }
 
