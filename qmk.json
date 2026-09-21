@@ -3,7 +3,7 @@
     "build_targets": [
         [
             "splitkb/halcyon/corne/rev2",
-            "vial_hlc",
+            "vial_hlc_legacy",
             {
                 "HLC_TFT_DISPLAY": "1",
                 "TARGET": "halcyon_corne_wired_left_tftdisplay"
@@ -11,7 +11,7 @@
         ],
         [
             "splitkb/halcyon/corne/rev2",
-            "vial_hlc",
+            "vial_hlc_legacy",
             {
                 "HLC_CIRQUE_TRACKPAD": "1",
                 "TARGET": "halcyon_corne_wired_right_cirquetrackpad"
