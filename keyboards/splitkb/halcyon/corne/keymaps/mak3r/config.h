@@ -11,6 +11,11 @@
 #define RGB_MATRIX_FRAMEBUFFER_EFFECTS
 #define RGB_MATRIX_KEYPRESSES
 
+// Default RGB Matrix brightness for a fresh/reset EEPROM (0-255). Only
+// applies on first init or after an EEPROM reset -- a normal reflash keeps
+// whatever brightness is already saved. Adjust live via Vial's Lighting tab.
+#define RGB_MATRIX_DEFAULT_VAL 20
+
 #define DYNAMIC_KEYMAP_LAYER_COUNT 8
 
 #define HALCYON_LEGACY
