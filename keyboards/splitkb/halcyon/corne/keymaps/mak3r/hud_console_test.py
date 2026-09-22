@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""PROTOTYPE smoke test for the CONSOLE_ENABLE-based layer HUD hook
-(hud_console.c on the experiment/console-hud branch). Not the real desktop
-app -- just proves the wire works end to end: flash one of the
-*_hudtest.uf2 builds, run this, switch layers, watch the output.
+"""Standalone diagnostic for hud_console.c's layer-broadcast HUD hook.
+Not the real desktop app (that's its own future project) -- this just
+listens on the CONSOLE_ENABLE interface and prints what it receives.
+Confirmed working on hardware, including with vial.rocks open at the
+same time.
 
 Requires: pip3 install --break-system-packages hid
 (the `hid` package needs the hidapi native library available on your
@@ -37,7 +38,7 @@ def main():
     matches = find_console_device()
     if not matches:
         print("No QMK console HID interface found.")
-        print("Is a *_hudtest.uf2 build flashed, and the keyboard plugged in?")
+        print("Is a mak3r build (CONSOLE_ENABLE) flashed, and the keyboard plugged in?")
         sys.exit(1)
 
     if len(matches) > 1:

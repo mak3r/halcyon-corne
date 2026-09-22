@@ -13,6 +13,7 @@ USER_NAME := halcyon_modules
 SRC += halcyon_overrides.c
 SRC += ledmap.c
 
-# PROTOTYPE -- experiment/console-hud branch only, not for the halcyon branch.
+# Broadcasts the active layer number over a separate USB HID interface
+# (see hud_console.c) for a future desktop HUD app to read.
 CONSOLE_ENABLE = yes
 SRC += hud_console.c

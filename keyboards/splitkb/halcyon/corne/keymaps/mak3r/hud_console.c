@@ -1,12 +1,10 @@
-// PROTOTYPE -- not yet validated on hardware, not part of the mak3r
-// keymap's real feature set. See experiment/console-hud branch.
-//
 // Pushes the active layer number to the CONSOLE_ENABLE USB HID interface
 // (a stock QMK feature, entirely separate from VIA/Vial's raw HID
-// interface -- see CLAUDE.md's split-state-sync notes for why that
-// separation matters) as a plain text line, for a desktop HUD app to read.
+// interface -- confirmed on hardware to keep working with vial.rocks open
+// at the same time) as a plain text line, for a future desktop HUD app to
+// read. See CLAUDE.md for why a separate interface matters here.
 //
-// Wire format (deliberately trivial for a smoke test): "LAYER:<n>\n"
+// Wire format (deliberately simple): "LAYER:<n>\n"
 
 #include QMK_KEYBOARD_H
 
