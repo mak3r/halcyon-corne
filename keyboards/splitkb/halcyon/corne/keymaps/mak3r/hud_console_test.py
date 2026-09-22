@@ -4,7 +4,7 @@
 app -- just proves the wire works end to end: flash one of the
 *_hudtest.uf2 builds, run this, switch layers, watch the output.
 
-Requires: pip install hid
+Requires: pip3 install --break-system-packages hid
 (the `hid` package needs the hidapi native library available on your
 system -- on macOS, `brew install hidapi` first if the import fails)
 """
@@ -13,7 +13,7 @@ import sys
 try:
     import hid
 except ImportError:
-    print("Missing dependency. Run: pip install hid", file=sys.stderr)
+    print("Missing dependency. Run: pip3 install --break-system-packages hid", file=sys.stderr)
     print("(and `brew install hidapi` on macOS if the import still fails)", file=sys.stderr)
     sys.exit(1)
 
@@ -48,16 +48,14 @@ def main():
     info = matches[0]
     print(f"Opening: {info['product_string']!r} (vid={info['vendor_id']:#06x} pid={info['product_id']:#06x})")
 
-    device = hid.device()
-    device.open_path(info["path"])
-    device.set_nonblocking(False)
+    device = hid.Device(path=info["path"])
 
     print("Listening for layer changes. Switch layers on the keyboard now (Ctrl-C to quit).\n")
 
     buf = b""
     try:
         while True:
-            data = device.read(64)
+            data = device.read(64, timeout=500)
             if not data:
                 continue
             # QMK console reports are padded with trailing zero bytes; strip them.
