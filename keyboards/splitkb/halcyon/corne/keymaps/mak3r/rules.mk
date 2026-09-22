@@ -12,3 +12,7 @@ USER_NAME := halcyon_modules
 
 SRC += halcyon_overrides.c
 SRC += ledmap.c
+
+# PROTOTYPE -- experiment/console-hud branch only, not for the halcyon branch.
+CONSOLE_ENABLE = yes
+SRC += hud_console.c
