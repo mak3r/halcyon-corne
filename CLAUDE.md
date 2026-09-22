@@ -53,6 +53,8 @@ This CSV-based approach is intentionally chosen to stay compatible with a possib
 
 Stock `vial_hlc_legacy` targets remain in `qmk.json` as the permanent known-good comparison.
 
+**Desktop HUD layer broadcast**: `hud_console.c` hooks `layer_state_set_user()` and writes `LAYER:<n>\n` to QMK's `CONSOLE_ENABLE` USB HID interface (usage page `0xFF31`, usage `0x74` — the "PJRC Teensy compatible" convention any `hid`-library client can filter on, no VID/PID needed) whenever the active layer changes. This is for a future desktop HUD app (its own separate repo, not this one — same reasoning as ZMK being a sibling repo: this one stays scoped to firmware). `CONSOLE_ENABLE` is a stock, cross-platform core QMK feature — deliberately *not* reusing VIA/Vial's own raw HID interface, since `via.c` already owns that channel's `raw_hid_receive()` and pushing unsolicited reports onto it risked corrupting Vial's request/response protocol state while vial.rocks/Vial desktop is open. Confirmed on hardware: layer changes are reported correctly and vial.rocks keeps working normally with the HUD script running at the same time (`hud_console_test.py` — a standalone diagnostic, not the real app, useful on its own for debugging this channel).
+
 ## Split state sync gotchas
 
 `CAPS_WORD_ENABLE` defaults to `yes` for every Vial keymap here (`builddefs/build_vial.mk`'s `?=` default), not just `mak3r` — so any code gated on `#if defined(CAPS_WORD_ENABLE)` compiles for the stock keymaps too, even without an explicit `CAPS_WORD_ENABLE = yes` in their `rules.mk`. Don't assume a feature flag is keymap-specific just because one keymap's `rules.mk` sets it explicitly.
