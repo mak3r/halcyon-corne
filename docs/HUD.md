@@ -2,6 +2,8 @@
 
 [`halcyon-corne-hud`](https://github.com/mak3r/halcyon-corne-hud) is a companion desktop app (a separate repo, not part of this one — see `CLAUDE.md`'s "Project Purpose" for why this repo stays scoped to firmware) that shows a real-time overlay of the active keymap layer, similar in spirit to ZSA's Keymapp. It's especially useful while learning a new layout: it highlights the key currently being held down, and can be pinned on-screen continuously instead of only flashing on layer changes.
 
+![The desktop HUD overlay showing Layer 0 (Base), colored to match the keyboard's real per-key RGB](images/hud-overlay.png)
+
 ## How it connects to this firmware
 
 The `mak3r` keymap's `hud_console.c` broadcasts two kinds of messages over QMK's `CONSOLE_ENABLE` USB HID interface — a stock, cross-platform QMK feature, deliberately a *separate* USB interface from VIA/Vial's own raw HID channel, so vial.rocks keeps working normally with the HUD app connected at the same time:

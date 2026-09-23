@@ -2,6 +2,8 @@
 
 Per-key/per-layer RGB colors aren't editable anywhere in Vial's UI — VialRGB's own UI only controls global brightness/animation mode, not individual key colors per layer. This fork has its own tool for that instead: the **Corne Palette Editor**, an interactive picker matching the Corne's actual physical layout (column stagger, thumb clusters, both halves), showing each key's real current keycode for context so you're coloring against the layout you actually have, not a generic grid.
 
+![Corne Palette Editor, showing layer 0 with per-key colors and the color-picker panel](images/palette-editor.png)
+
 ## Source
 
 `keyboards/splitkb/halcyon/corne/keymaps/mak3r/palette-editor.html` — a single self-contained HTML file, committed like any other source in this repo.
