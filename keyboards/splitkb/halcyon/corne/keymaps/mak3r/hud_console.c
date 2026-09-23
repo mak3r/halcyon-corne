@@ -2,7 +2,7 @@
 // CONSOLE_ENABLE USB HID interface (a stock QMK feature, entirely separate
 // from VIA/Vial's raw HID interface -- confirmed on hardware to keep
 // working with vial.rocks open at the same time) as plain text lines, for
-// the halcyon-corne-hud desktop app to read. See CLAUDE.md for why a
+// the corne-kbd-hud desktop app to read. See CLAUDE.md for why a
 // separate interface matters here.
 //
 // Wire format (deliberately simple):
