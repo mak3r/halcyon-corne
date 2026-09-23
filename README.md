@@ -1,10 +1,14 @@
 # Splitkb Halcyon Modules QMK Userspace
 
-This is the splitkb userspace repository. It allows for an external set of QMK keymaps with **Halcyon modules** to be defined and compiled without having to fork the main QMK or Vial repositories. 
+This is `mak3r/halcyon-corne`, a personal fork of the [splitkb userspace repository](https://github.com/splitkb/qmk_userspace), which allows for an external set of QMK keymaps with **Halcyon modules** to be defined and compiled without having to fork the main QMK or Vial repositories.
+
+**This fork itself only builds one board: Halcyon Corne rev2** (`splitkb/halcyon/corne/rev2`, see `qmk.json`) — the sections below describe the general splitkb tooling this fork is built on, which is capable of more than that (see "Supported Keyboards"), but nothing beyond Corne is actively configured, built, or tested here. See `CLAUDE.md` for this fork's actual purpose and scope.
 
 *If you want to compile standard firmware without any Halcyon modules, you can use the [main qmk_userspace repo](https://github.com/qmk/qmk_userspace). If you use the Halcyon to Promicro adapter board without any Halcyon modules you can use the converter without this repository.*
 
 ## Supported Keyboards
+
+*(General capability of the upstream `splitkb/qmk_userspace` tooling this fork is built on — not a list of what this specific fork builds. This fork's `qmk.json` only configures the bolded row below.)*
 
 Supported controllers:
 
@@ -19,7 +23,7 @@ Supported keyboards:
 | :--- | :--- |
 | Halcyon Kyria (rev4) | `splitkb/halcyon/kyria/rev4` |
 | Halcyon Elora (rev2) | `splitkb/halcyon/elora/rev2` |
-| Halcyon Corne (rev2) | `splitkb/halcyon/corne/rev2` |
+| **Halcyon Corne (rev2)** | **`splitkb/halcyon/corne/rev2`** |
 | Halcyon Ferris (rev1) | `splitkb/halcyon/ferris/rev1` |
 | Halcyon Lily58 (rev2) | `splitkb/halcyon/lily58/rev2` |
 | Aurora Sweep (rev1)* | `splitkb/aurora/sweep/rev1` |
@@ -29,7 +33,7 @@ Supported keyboards:
 | Aurora Sofle v2 (rev1)* | `splitkb/aurora/sofle_v2/rev1` |
 | Kyria (rev3)* | `splitkb/kyria/rev3` |
 
-*Requires the Halcyon converter
+*Requires the Halcyon converter — **not applicable to this fork**; Halcyon Corne rev2 is a native Halcyon board and doesn't use a converter. The converter row below is upstream reference info for using the Halcyon adapter with one of these non-Halcyon boards instead, which this fork doesn't do.
 
 
 Supported converters:
@@ -39,7 +43,7 @@ Supported converters:
 | Halcyon | `halcyon` | `CONVERT_TO=halcyon` |
 
 
-Supported modules:
+Supported modules — both rows below are used by this fork (the TFT display on the left half, the Cirque trackpad on the right, per `qmk.json`); the two encoder options are additional upstream choices this fork doesn't currently use:
 
 | Module name | Module variable |
 | :--- | :--- |
