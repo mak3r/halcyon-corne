@@ -32,4 +32,4 @@ See `CLAUDE.md`'s "The `mak3r` keymap" section for the full `rgb_layers.csv` for
 
 ## Relationship to the desktop HUD
 
-The [`halcyon-corne-hud`](https://github.com/mak3r/halcyon-corne-hud) desktop app renders each key using the same underlying color data this editor writes (via `rgb_layers.csv`, converted into that app's own `mak3r_layers.json`). Colors picked here won't show up in the HUD automatically — see that repo's `scripts/generate_layout_data.py` and its own [docs/PALETTE_EDITOR.md](https://github.com/mak3r/halcyon-corne-hud/blob/main/docs/PALETTE_EDITOR.md) for regenerating its copy of the data after a palette edit here.
+The [`corne-kbd-hud`](https://github.com/mak3r/corne-kbd-hud) desktop app renders each key using the same underlying color data this editor writes (via `rgb_layers.csv`, converted into that app's own `mak3r_layers.json`). Colors picked here won't show up in the HUD automatically — see that repo's `scripts/generate_layout_data.py` and its own [docs/PALETTE_EDITOR.md](https://github.com/mak3r/corne-kbd-hud/blob/main/docs/PALETTE_EDITOR.md) for regenerating its copy of the data after a palette edit here.

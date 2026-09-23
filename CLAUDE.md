@@ -53,7 +53,7 @@ This CSV-based approach is intentionally chosen to stay compatible with a possib
 
 Stock `vial_hlc_legacy` targets remain in `qmk.json` as the permanent known-good comparison.
 
-**Desktop HUD layer + keystroke broadcast**: `hud_console.c` writes plain text lines to QMK's `CONSOLE_ENABLE` USB HID interface (usage page `0xFF31`, usage `0x74` — the "PJRC Teensy compatible" convention any `hid`-library client can filter on, no VID/PID needed) for the `halcyon-corne-hud` desktop app (its own separate repo, not this one — same reasoning as ZMK being a sibling repo: this one stays scoped to firmware) to read:
+**Desktop HUD layer + keystroke broadcast**: `hud_console.c` writes plain text lines to QMK's `CONSOLE_ENABLE` USB HID interface (usage page `0xFF31`, usage `0x74` — the "PJRC Teensy compatible" convention any `hid`-library client can filter on, no VID/PID needed) for the `corne-kbd-hud` desktop app (its own separate repo, not this one — same reasoning as ZMK being a sibling repo: this one stays scoped to firmware) to read:
 - `layer_state_set_user()` writes `LAYER:<n>\n` whenever the active layer changes.
 - `process_record_user()` writes `KEY:<row>,<col>,<0|1>\n` on every keypress/release, using the same matrix row/col space as `keymap.json`/`g_led_config` — lets the HUD app highlight the specific key being held, as a visual checkpoint while learning the layout.
 
