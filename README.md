@@ -70,11 +70,11 @@ then rebuild/reflash. See `CLAUDE.md`'s "The `mak3r` keymap" section for the ful
 
 ### Editing colors: the Corne Palette Editor
 
-Per-key/per-layer RGB colors aren't editable in Vial's UI at all, so this fork has its own tool for it: **Corne Palette Editor**, an interactive picker matching the Corne's actual physical layout (column stagger, thumb clusters, both halves), showing each key's real current keycode for context.
+Per-key/per-layer RGB colors aren't editable in Vial's UI at all, so this fork has its own tool for it: an interactive picker matching the Corne's actual physical layout. See **[docs/PALETTE_EDITOR.md](docs/PALETTE_EDITOR.md)** for how to use it and how edits flow into the compiled firmware.
 
-- **Source**: `keyboards/splitkb/halcyon/corne/keymaps/mak3r/palette-editor.html`.
-- **To use it**: ask Claude to open/republish it as an Artifact — it needs Claude's Artifact runtime (specifically the `db` capability) to save your color choices as you go and read them back afterward. Opening the raw HTML file directly still renders the picker, but without that runtime your changes won't persist or reach Claude; use its "View/copy CSV" panel to grab colors manually in that case.
-- Ask Claude to pull your saved colors in whenever you're ready — it regenerates `rgb_layers.csv` (`generate_ledmap.py` then turns that into the compiled `ledmap.c`) and rebuilds.
+### Watching it live: the Desktop HUD
+
+A companion desktop app shows a real-time overlay of the active layer and highlights keys as you press them — useful while learning a new layout. See **[docs/HUD.md](docs/HUD.md)**, including which HUD release pairs with which firmware release.
 
 
 ## Initial Setup & Prerequisites
