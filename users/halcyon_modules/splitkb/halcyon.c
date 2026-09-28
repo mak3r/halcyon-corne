@@ -113,13 +113,15 @@ void housekeeping_task_kb(void) {
     }
 
     // Backlight feature
-    if (last_input_activity_elapsed() <= HLC_BACKLIGHT_TIMEOUT) {
-        if (backlight_off) {
-            backlight_wakeup();
-        }
-    } else {
-        if (!backlight_off) {
-            backlight_suspend();
+    if (HLC_BACKLIGHT_TIMEOUT != 0) {
+        if (last_input_activity_elapsed() <= HLC_BACKLIGHT_TIMEOUT) {
+            if (backlight_off) {
+                backlight_wakeup();
+            }
+        } else {
+            if (!backlight_off) {
+                backlight_suspend();
+            }
         }
     }
 
