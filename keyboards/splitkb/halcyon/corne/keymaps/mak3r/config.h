@@ -16,6 +16,15 @@
 // whatever brightness is already saved. Adjust live via Vial's Lighting tab.
 #define RGB_MATRIX_DEFAULT_VAL 20
 
+// Turn the key LEDs (including ledmap.c's per-layer colors) off after 15
+// minutes with no key/trackpad input; the next input wakes them. The TFT
+// backlight has its own, shorter timeout (HLC_BACKLIGHT_TIMEOUT).
+#define RGB_MATRIX_TIMEOUT 900000
+// Share the input-activity timestamp across the split link. Without it,
+// each half only counts its own keys, so the non-master half would go dark
+// while you're still typing on the other one.
+#define SPLIT_ACTIVITY_ENABLE
+
 #define DYNAMIC_KEYMAP_LAYER_COUNT 8
 
 // Layer 4 is the mouse layer: trackpad movement turns it on automatically
