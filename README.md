@@ -76,6 +76,10 @@ then rebuild/reflash. See `CLAUDE.md`'s "The `mak3r` keymap" section for the ful
 
 Per-key/per-layer RGB colors aren't editable in Vial's UI at all, so this fork has its own tool for it: an interactive picker matching the Corne's actual physical layout. See **[docs/PALETTE_EDITOR.md](docs/PALETTE_EDITOR.md)** for how to use it and how edits flow into the compiled firmware.
 
+### Using the trackpad: mouse layer and gestures
+
+Using the Cirque trackpad automatically turns on a mouse layer (layer 4) with left/middle/right click on the left home row. The pad itself supports tap-to-click and circular edge scrolling. See **[docs/TRACKPAD.md](docs/TRACKPAD.md)** for the keys, how the edge scroll gesture works, and how to tune it.
+
 ### Watching it live: the Desktop HUD
 
 A companion desktop app shows a real-time overlay of the active layer and highlights keys as you press them — useful while learning a new layout. See **[docs/HUD.md](docs/HUD.md)**, including which HUD release pairs with which firmware release.
