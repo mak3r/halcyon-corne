@@ -680,7 +680,8 @@
         if (!data) return;
         const idx = parseInt(d.id.replace("layer-", ""), 10);
         if (Number.isFinite(idx) && idx >= 0 && idx < 8) {
-          state[idx] = { fill: data.fill || null, overrides: data.overrides || {} };
+          // Snapshot data() is frozen -- clone it, or edits to overrides throw.
+          state[idx] = JSON.parse(JSON.stringify({ fill: data.fill || null, overrides: data.overrides || {} }));
         }
       });
       dbReady = true;
