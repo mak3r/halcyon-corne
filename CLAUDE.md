@@ -68,5 +68,5 @@ QMK syncs `layer_state` and host LED state (real Caps/Num/Scroll Lock) across th
 ## Commit standards
 
 - Conventional commit style: `<type>(<scope>): <description>` (`feat`, `fix`, `docs`, `ci`, `chore`, etc.)
-- Include `Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>` on commits made by Claude.
+- Include `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` on commits made by Claude.
 - Never reference a commit SHA in a comment/PR without verifying it with `git rev-parse --verify <sha>`.
