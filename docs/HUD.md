@@ -32,6 +32,7 @@ The two repos are tightly coupled — the HUD app can only show what the firmwar
 | `corne-kbd-hud` | requires `halcyon-corne` | why |
 |---|---|---|
 | [v0.1.0](https://github.com/mak3r/corne-kbd-hud/releases/tag/v0.1.0) | [v0.1.0-mak3r](https://github.com/mak3r/halcyon-corne/releases/tag/v0.1.0-mak3r) or later | `v0.1.0-mak3r` is the first firmware release broadcasting `KEY:` (per-keystroke) messages, which this HUD version relies on for its press-highlight feature — older `mak3r` builds only sent `LAYER:`. |
+| [v0.2.0](https://github.com/mak3r/corne-kbd-hud/releases/tag/v0.2.0) | [v0.1.0-mak3r](https://github.com/mak3r/halcyon-corne/releases/tag/v0.1.0-mak3r) or later | No firmware protocol changes since `v0.1.0`. Its baked-in key labels/colors match [v0.1.1-mak3r](https://github.com/mak3r/halcyon-corne/releases/tag/v0.1.1-mak3r)'s layout. |
 
 *(Keep this table's rows in sync with the identical copy in `corne-kbd-hud`'s own `docs/HUD.md` whenever a new paired release goes out on either side.)*
 
