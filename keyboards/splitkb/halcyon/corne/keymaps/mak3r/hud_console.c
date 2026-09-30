@@ -12,6 +12,7 @@
 //                                     as keymap.json and g_led_config)
 
 #include QMK_KEYBOARD_H
+#include "mouse_layer.h"
 
 layer_state_t layer_state_set_user(layer_state_t state) {
     static uint8_t last_layer = 255; // force a print on first call
@@ -25,5 +26,6 @@ layer_state_t layer_state_set_user(layer_state_t state) {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     uprintf("KEY:%d,%d,%d\n", record->event.key.row, record->event.key.col, record->event.pressed);
+    mouse_layer_process_record(keycode, record);
     return true;
 }

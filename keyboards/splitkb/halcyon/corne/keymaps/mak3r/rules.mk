@@ -17,3 +17,6 @@ SRC += ledmap.c
 # (see hud_console.c) for a future desktop HUD app to read.
 CONSOLE_ENABLE = yes
 SRC += hud_console.c
+
+# Layer 4 = auto mouse layer, turned on by trackpad movement (see mouse_layer.c).
+SRC += mouse_layer.c

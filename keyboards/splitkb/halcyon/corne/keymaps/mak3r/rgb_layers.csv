@@ -15,8 +15,9 @@
 #
 # Designed interactively in the Corne Palette Editor artifact tool (per-key color picker
 # matching the physical layout) and pulled in from there. Layers 0-3 have real designed
-# colors; layers 4-7 (mostly-unused return/placeholder layers) are dim, distinct shades
-# of white rather than a designed per-key scheme.
+# colors; layer 4 (mouse) is a dim white fill with its click and return keys
+# highlighted; layers 5-7 (mostly-unused placeholder layers) are dim, distinct
+# shades of white rather than a designed per-key scheme.
 layer,row,col,h,s,v
 
 # --- Layer 0: Base/QWERTY -- outer column blue, F/J homing keys lighter purple, rest green, thumb purple. ---
@@ -134,8 +135,13 @@ layer,row,col,h,s,v
 3,8,4,188,255,255
 3,8,5,188,255,255
 
-# --- Layer 4: Return -- dim white. ---
+# --- Layer 4: Mouse -- dim white fill, click keys (S/D/F = right/middle/left) orange, TO(0) middle thumbs red. ---
 4,*,*,0,0,216
+4,1,2,21,255,255
+4,1,3,21,255,255
+4,1,4,21,255,255
+4,3,4,0,255,255
+4,8,4,0,255,255
 
 # --- Layer 5: Return2 -- dim white. ---
 5,*,*,0,0,234

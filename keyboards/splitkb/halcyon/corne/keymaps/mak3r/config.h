@@ -18,6 +18,13 @@
 
 #define DYNAMIC_KEYMAP_LAYER_COUNT 8
 
+// Layer 4 is the mouse layer: trackpad movement turns it on automatically
+// (see mouse_layer.c). AUTO_MOUSE_TIME (default 650ms) is how long it stays
+// on after the last mouse activity -- the knob to tune if it drops out too
+// quickly or lingers.
+#define POINTING_DEVICE_AUTO_MOUSE_ENABLE
+#define AUTO_MOUSE_DEFAULT_LAYER 4
+
 #define HALCYON_LEGACY
 
 #undef MATRIX_ROWS
