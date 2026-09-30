@@ -17,9 +17,9 @@
                         "KC_MUTE" , "KC_NO"   , "KC_NO"   , "KC_NO"   , "KC_NO"   , "KC_MUTE" , "KC_NO"   , "KC_NO"   , "KC_NO"   , "KC_NO"   
         ],
         [
-            "KC_GRAVE", "KC_KP_1" , "KC_KP_2" , "KC_KP_3" , "KC_KP_4" , "KC_KP_5" , "KC_KP_6" , "KC_KP_7" , "KC_KP_8" , "KC_KP_9" , "KC_KP_0" , "KC_DELETE" ,
+            "KC_GRAVE", "KC_KP_1" , "KC_KP_2" , "KC_KP_3" , "KC_KP_4" , "KC_KP_5" , "KC_KP_6" , "KC_KP_7" , "KC_KP_8" , "KC_KP_9" , "KC_KP_0" , "KC_BSPC"  ,
             "LSFT(KC_GRAVE)", "LSFT(KC_1)", "LSFT(KC_2)", "LSFT(KC_3)", "LSFT(KC_4)", "LSFT(KC_5)", "LSFT(KC_6)", "LSFT(KC_7)", "LSFT(KC_8)", "LSFT(KC_9)", "LSFT(KC_0)", "KC_BSLS"  ,
-            "KC_LSFT" , "KC_KP_MINUS", "KC_KP_EQUAL", "KC_LBRC" , "KC_RBRC" , "LSFT(KC_MINUS)", "LSFT(KC_EQUAL)", "LSFT(KC_LBRC)", "LSFT(KC_RBRC)", "LSFT(KC_BSLS)", "KC_NO"   , "KC_NO"    ,
+            "KC_LSFT" , "KC_KP_MINUS", "KC_KP_EQUAL", "KC_LBRC" , "KC_RBRC" , "LSFT(KC_MINUS)", "LSFT(KC_EQUAL)", "LSFT(KC_LBRC)", "LSFT(KC_RBRC)", "KC_KP_DOT", "LSFT(KC_BSLS)", "KC_NO"    ,
                                                 "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "OSL(3)"  , "KC_TRNS"  ,
                         "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" 
         ],
