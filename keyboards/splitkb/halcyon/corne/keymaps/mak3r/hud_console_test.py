@@ -8,8 +8,14 @@ same time.
 Requires: pip3 install --break-system-packages hid
 (the `hid` package needs the hidapi native library available on your
 system -- on macOS, `brew install hidapi` first if the import fails)
+
+Each received line is prefixed with a wall-clock timestamp (not just the
+firmware's own boot-relative ms counter in MOTION lines), so an overnight
+capture (e.g. `python3 hud_console_test.py > overnight.log 2>&1 &`) is
+directly readable the next morning without correlating elapsed time by hand.
 """
 import sys
+import time
 
 try:
     import hid
@@ -66,7 +72,8 @@ def main():
                 line, buf = buf.split(b"\n", 1)
                 text = line.decode("utf-8", errors="replace").strip()
                 if text:
-                    print(f"> {text}")
+                    ts = time.strftime("%H:%M:%S")
+                    print(f"[{ts}] > {text}")
     except KeyboardInterrupt:
         print("\nStopping.")
     finally:

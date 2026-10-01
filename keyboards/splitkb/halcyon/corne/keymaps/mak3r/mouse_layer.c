@@ -26,3 +26,27 @@ void mouse_layer_process_record(uint16_t keycode, keyrecord_t *record) {
         auto_mouse_toggle();
     }
 }
+
+#if defined(CONSOLE_ENABLE)
+// Diagnostic: log every non-zero raw pointing-device report, rate-limited
+// to 10/sec. Investigating a real-hardware report of the RGB LEDs failing
+// to time out overnight on one half (the Cirque/right half specifically,
+// which was also split master at the time) while the other half correctly
+// went dark. Any pointing-device motion -- even a tiny spurious blip from
+// environmental noise/static on the Cirque sensor -- updates
+// last_input_activity_time via last_pointing_device_activity_trigger()
+// (quantum/keyboard.c), which is exactly what RGB_MATRIX_TIMEOUT checks.
+// This log is how we find out whether that's actually happening: run
+// hud_console_test.py (or the real HUD app) overnight and check the
+// morning's log for MOTION lines with no corresponding real trackpad use.
+report_mouse_t pointing_device_task_combined_user(report_mouse_t left_report, report_mouse_t right_report) {
+    if (left_report.x || left_report.y || right_report.x || right_report.y) {
+        static uint32_t last_log = 0;
+        if (timer_elapsed32(last_log) > 100) {
+            uprintf("MOTION:%lu,%d,%d,%d,%d\n", timer_read32(), (int)left_report.x, (int)left_report.y, (int)right_report.x, (int)right_report.y);
+            last_log = timer_read32();
+        }
+    }
+    return pointing_device_combine_reports(left_report, right_report);
+}
+#endif

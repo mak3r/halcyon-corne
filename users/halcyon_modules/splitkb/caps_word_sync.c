@@ -27,6 +27,15 @@ static void caps_word_sync_slave_handler(uint8_t in_buflen, const void *in_data,
 }
 
 void keyboard_post_init_user(void) {
+    // Unrelated to Caps Word -- this is the shared repo-wide
+    // keyboard_post_init_user() hook, already claimed here, so a
+    // diagnostic build-version broadcast (for ruling out a firmware
+    // mismatch between the two physical halves, e.g. after only one side
+    // got reflashed) lives here too rather than fighting over the hook.
+    // No-op (compiles out entirely) on keymaps without CONSOLE_ENABLE.
+#if defined(CONSOLE_ENABLE)
+    uprintf("BUILD:%s %s\n", __DATE__, __TIME__);
+#endif
     transaction_register_rpc(RPC_ID_CAPS_WORD, caps_word_sync_slave_handler);
 }
 
