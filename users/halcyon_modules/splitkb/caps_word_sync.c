@@ -42,10 +42,20 @@ void housekeeping_task_user(void) {
     // Fires on both halves (not gated to master) so whichever half you
     // swap to be master shows ITS OWN build info. No-op (compiles out
     // entirely) on keymaps without CONSOLE_ENABLE.
+    //
+    // __DATE__/__TIME__ reflect whatever system clock/timezone the
+    // compiler ran under -- confirmed this differs from the user's local
+    // time when building via the documented Docker workflow (the
+    // container defaults to UTC regardless of host timezone), and CI
+    // (GitHub Actions) also runs in UTC by default. Rather than chasing
+    // TZ passthrough separately for every build environment this repo
+    // might compile in (local Docker, a native toolchain, CI), the
+    // broadcast just says explicitly what it is -- correct everywhere,
+    // no environment-specific fixup needed.
 #if defined(CONSOLE_ENABLE)
     static uint32_t last_build_broadcast = 0;
     if (timer_elapsed32(last_build_broadcast) > 10000) {
-        uprintf("BUILD:%s %s\n", __DATE__, __TIME__);
+        uprintf("BUILD:%s %s UTC\n", __DATE__, __TIME__);
         last_build_broadcast = timer_read32();
     }
 #endif
