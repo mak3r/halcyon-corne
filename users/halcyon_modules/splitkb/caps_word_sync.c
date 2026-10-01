@@ -27,19 +27,29 @@ static void caps_word_sync_slave_handler(uint8_t in_buflen, const void *in_data,
 }
 
 void keyboard_post_init_user(void) {
-    // Unrelated to Caps Word -- this is the shared repo-wide
-    // keyboard_post_init_user() hook, already claimed here, so a
-    // diagnostic build-version broadcast (for ruling out a firmware
-    // mismatch between the two physical halves, e.g. after only one side
-    // got reflashed) lives here too rather than fighting over the hook.
-    // No-op (compiles out entirely) on keymaps without CONSOLE_ENABLE.
-#if defined(CONSOLE_ENABLE)
-    uprintf("BUILD:%s %s\n", __DATE__, __TIME__);
-#endif
     transaction_register_rpc(RPC_ID_CAPS_WORD, caps_word_sync_slave_handler);
 }
 
 void housekeeping_task_user(void) {
+    // Unrelated to Caps Word -- this is the shared repo-wide
+    // housekeeping_task_user() hook, already claimed here, so a periodic
+    // diagnostic build-version broadcast (for ruling out a firmware
+    // mismatch between the two physical halves, e.g. after only one side
+    // got reflashed) lives here too rather than fighting over the hook.
+    // Periodic, not just once at boot, so it's visible to a listener
+    // connecting at any time, not just within a race window right after
+    // power-up -- the corne-kbd-hud app surfaces this in its tray tooltip.
+    // Fires on both halves (not gated to master) so whichever half you
+    // swap to be master shows ITS OWN build info. No-op (compiles out
+    // entirely) on keymaps without CONSOLE_ENABLE.
+#if defined(CONSOLE_ENABLE)
+    static uint32_t last_build_broadcast = 0;
+    if (timer_elapsed32(last_build_broadcast) > 10000) {
+        uprintf("BUILD:%s %s\n", __DATE__, __TIME__);
+        last_build_broadcast = timer_read32();
+    }
+#endif
+
     if (is_keyboard_master()) {
         static bool last_sent = false;
         static uint32_t last_sync = 0;

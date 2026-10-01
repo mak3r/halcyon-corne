@@ -10,6 +10,9 @@
 *.bin
 *.uf2
 
+# hud_console_test.py capture sessions (diagnostic scratch output)
+*.log
+
 # clangd
 compile_commands.json
 .clangd/
