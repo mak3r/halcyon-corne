@@ -56,6 +56,17 @@ void housekeeping_task_user(void) {
     static uint32_t last_build_broadcast = 0;
     if (timer_elapsed32(last_build_broadcast) > 10000) {
         uprintf("BUILD:%s %s UTC\n", __DATE__, __TIME__);
+        // Investigating RGB_MATRIX_TIMEOUT not firing on the master half
+        // despite zero logged MOTION/KEY events overnight (see CLAUDE.md's
+        // "Open investigation") -- this logs the actual elapsed-since-
+        // activity values rgb_matrix_task() itself checks
+        // (last_input_activity_elapsed() > RGB_MATRIX_TIMEOUT is the ONLY
+        // non-suspend gate it uses), broken down by category, so we can
+        // see directly whether the timer is genuinely growing past 900000
+        // (pointing to a bug in how the LEDs respond to that, not in
+        // activity tracking) or quietly resetting (pointing to an
+        // activity source this investigation hasn't found yet).
+        uprintf("ACT:%lu,%lu,%lu,%lu,%d\n", (unsigned long)last_input_activity_elapsed(), (unsigned long)last_matrix_activity_elapsed(), (unsigned long)last_encoder_activity_elapsed(), (unsigned long)last_pointing_device_activity_elapsed(), is_keyboard_master());
         last_build_broadcast = timer_read32();
     }
 #endif

@@ -13,6 +13,14 @@ Each received line is prefixed with a wall-clock timestamp (not just the
 firmware's own boot-relative ms counter in MOTION lines), so an overnight
 capture (e.g. `python3 hud_console_test.py > overnight.log 2>&1 &`) is
 directly readable the next morning without correlating elapsed time by hand.
+
+Every print() below passes flush=True -- Python fully buffers stdout (not
+just line-buffers it) when it's not a terminal, which a redirect to a file
+always triggers. Without an explicit flush, a backgrounded, redirected run
+can sit for a long time with the destination file showing 0 bytes even
+though the script is running and receiving data correctly -- confirmed
+hardware behavior, not a sign anything is actually broken, but confusing
+enough during a live diagnostic to be worth avoiding outright.
 """
 import sys
 import time
@@ -20,8 +28,8 @@ import time
 try:
     import hid
 except ImportError:
-    print("Missing dependency. Run: pip3 install --break-system-packages hid", file=sys.stderr)
-    print("(and `brew install hidapi` on macOS if the import still fails)", file=sys.stderr)
+    print("Missing dependency. Run: pip3 install --break-system-packages hid", file=sys.stderr, flush=True)
+    print("(and `brew install hidapi` on macOS if the import still fails)", file=sys.stderr, flush=True)
     sys.exit(1)
 
 # QMK's CONSOLE_ENABLE interface always uses this usage page/usage
@@ -43,21 +51,21 @@ def find_console_device():
 def main():
     matches = find_console_device()
     if not matches:
-        print("No QMK console HID interface found.")
-        print("Is a mak3r build (CONSOLE_ENABLE) flashed, and the keyboard plugged in?")
+        print("No QMK console HID interface found.", flush=True)
+        print("Is a mak3r build (CONSOLE_ENABLE) flashed, and the keyboard plugged in?", flush=True)
         sys.exit(1)
 
     if len(matches) > 1:
-        print(f"Found {len(matches)} console interfaces, using the first:")
+        print(f"Found {len(matches)} console interfaces, using the first:", flush=True)
         for m in matches:
-            print(f"  {m['product_string']!r} path={m['path']!r}")
+            print(f"  {m['product_string']!r} path={m['path']!r}", flush=True)
 
     info = matches[0]
-    print(f"Opening: {info['product_string']!r} (vid={info['vendor_id']:#06x} pid={info['product_id']:#06x})")
+    print(f"Opening: {info['product_string']!r} (vid={info['vendor_id']:#06x} pid={info['product_id']:#06x})", flush=True)
 
     device = hid.Device(path=info["path"])
 
-    print("Listening for layer changes. Switch layers on the keyboard now (Ctrl-C to quit).\n")
+    print("Listening for layer changes. Switch layers on the keyboard now (Ctrl-C to quit).\n", flush=True)
 
     buf = b""
     try:
@@ -73,9 +81,9 @@ def main():
                 text = line.decode("utf-8", errors="replace").strip()
                 if text:
                     ts = time.strftime("%H:%M:%S")
-                    print(f"[{ts}] > {text}")
+                    print(f"[{ts}] > {text}", flush=True)
     except KeyboardInterrupt:
-        print("\nStopping.")
+        print("\nStopping.", flush=True)
     finally:
         device.close()
 
