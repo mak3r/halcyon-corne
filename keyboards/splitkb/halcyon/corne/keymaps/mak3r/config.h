@@ -40,6 +40,13 @@
 #define POINTING_DEVICE_AUTO_MOUSE_ENABLE
 #define AUTO_MOUSE_DEFAULT_LAYER 4
 
+// Toggle-able drag-to-scroll mode (A key, layer 4 -- see mouse_layer.c).
+// Guards hlc_tft_display.c's "Scroll" indicator so it also lights up for
+// this, not just real Scroll Lock -- same pattern as CAPS_WORD_ENABLE's
+// guard there, but this one is mak3r-only (not a repo-wide default), since
+// the feature only exists in this keymap's own mouse_layer.c.
+#define SCROLL_DRAG_MODE_ENABLE
+
 #define HALCYON_LEGACY
 
 #undef MATRIX_ROWS

@@ -8,7 +8,11 @@
 #define SPLIT_TRANSACTION_IDS_KB MODULE_SYNC
 // Caps Word has no built-in split sync (unlike the SPLIT_*_ENABLE flags
 // below) -- caps_word_sync.c sends it over this transaction.
-#define SPLIT_TRANSACTION_IDS_USER RPC_ID_CAPS_WORD
+// RPC_ID_SCROLL_DRAG is unused by anything except mak3r's own
+// mouse_layer.c (SCROLL_DRAG_MODE_ENABLE, set only in that keymap's
+// config.h) -- reserved here anyway since this ID list is shared across
+// all keymaps; harmless for keymaps that never send/receive it.
+#define SPLIT_TRANSACTION_IDS_USER RPC_ID_CAPS_WORD, RPC_ID_SCROLL_DRAG
 
 #define SPLIT_POINTING_ENABLE
 #define POINTING_DEVICE_COMBINED

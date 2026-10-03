@@ -14,6 +14,15 @@
 extern bool is_caps_word_active_synced(void);
 #endif
 
+#if defined(SCROLL_DRAG_MODE_ENABLE)
+// Defined in mak3r's mouse_layer.c -- same slave-safe-sync reasoning as
+// is_caps_word_active_synced() above. Only defined for keymaps that set
+// SCROLL_DRAG_MODE_ENABLE (mak3r only, not a repo-wide default like
+// CAPS_WORD_ENABLE), so this whole file stays linkable for every other
+// keymap that doesn't have this feature at all.
+extern bool is_scroll_drag_active_synced(void);
+#endif
+
 // Fonts mono2
 #include "graphics/fonts/Retron2000-27.qff.h"
 #include "graphics/fonts/Retron2000-underline-27.qff.h"
@@ -46,9 +55,10 @@ int color_value = 0;
 painter_device_t lcd;
 painter_device_t lcd_surface;
 
-led_t         last_led_usb_state = {0};
-layer_state_t last_layer_state   = {0};
-bool          last_caps_active   = false;
+led_t         last_led_usb_state     = {0};
+layer_state_t last_layer_state       = {0};
+bool          last_caps_active       = false;
+bool          last_scroll_indicator  = false;
 
 #define GRID_WIDTH 27
 #define GRID_HEIGHT 48
@@ -204,15 +214,23 @@ void update_display(void) {
 #endif
     bool caps_active = host_keyboard_led_state().caps_lock || caps_word_active;
 
-    if (last_led_usb_state.raw != host_keyboard_led_state().raw || caps_active != last_caps_active || first_run_led == false) {
+#if defined(SCROLL_DRAG_MODE_ENABLE)
+    bool scroll_drag_active = is_scroll_drag_active_synced();
+#else
+    bool scroll_drag_active = false;
+#endif
+    bool scroll_indicator = host_keyboard_led_state().scroll_lock || scroll_drag_active;
+
+    if (last_led_usb_state.raw != host_keyboard_led_state().raw || caps_active != last_caps_active || scroll_indicator != last_scroll_indicator || first_run_led == false) {
         led_t led_usb_state = host_keyboard_led_state();
 
         caps_active ? qp_drawtext_recolor(lcd_surface, 5, LCD_HEIGHT - Retron27->line_height * 3 - 15, Retron27_underline, caps, HSV_CAPS_ON, HSV_BLACK) : qp_drawtext_recolor(lcd_surface, 5, LCD_HEIGHT - Retron27->line_height * 3 - 15, Retron27, caps, HSV_CAPS_OFF, HSV_BLACK);
         led_usb_state.num_lock ? qp_drawtext_recolor(lcd_surface, 5, LCD_HEIGHT - Retron27->line_height * 2 - 10, Retron27_underline, num, HSV_NUM_ON, HSV_BLACK) : qp_drawtext_recolor(lcd_surface, 5, LCD_HEIGHT - Retron27->line_height * 2 - 10, Retron27, num, HSV_NUM_OFF, HSV_BLACK);
-        led_usb_state.scroll_lock ? qp_drawtext_recolor(lcd_surface, 5, LCD_HEIGHT - Retron27->line_height - 5, Retron27_underline, scroll, HSV_SCROLL_ON, HSV_BLACK) : qp_drawtext_recolor(lcd_surface, 5, LCD_HEIGHT - Retron27->line_height - 5, Retron27, scroll, HSV_SCROLL_OFF, HSV_BLACK);
+        scroll_indicator ? qp_drawtext_recolor(lcd_surface, 5, LCD_HEIGHT - Retron27->line_height - 5, Retron27_underline, scroll, HSV_SCROLL_ON, HSV_BLACK) : qp_drawtext_recolor(lcd_surface, 5, LCD_HEIGHT - Retron27->line_height - 5, Retron27, scroll, HSV_SCROLL_OFF, HSV_BLACK);
 
-        last_led_usb_state = led_usb_state;
-        last_caps_active   = caps_active;
+        last_led_usb_state    = led_usb_state;
+        last_caps_active      = caps_active;
+        last_scroll_indicator = scroll_indicator;
         first_run_led      = true;
     }
 

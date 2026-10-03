@@ -11,6 +11,7 @@ Using the trackpad turns on layer 4 automatically (QMK's [auto mouse layer](http
 | F | Left click |
 | D | Middle click |
 | S | Right click |
+| A | Toggle drag-to-scroll mode (see below) |
 | Middle thumb key (either side) | Back to layer 0 (`TO(0)`) |
 
 Layer 4 turns off by itself after ~650ms with no trackpad or click activity, or as soon as you press any non-mouse key. Every other key on layer 4 is transparent.
@@ -35,6 +36,11 @@ The desktop HUD deliberately stays hidden on layer 4. Otherwise it would flash u
    - Start on the **left** edge: scroll **left/right**.
 4. **Keep circling** to keep scrolling, about 18 wheel steps per full circle.
 
+**Drag-to-scroll mode**: an alternative to the circular gesture, for when it's hard to land precisely in the edge zone. Tap **A** (layer 4) to toggle it on — the TFT's "Scroll" indicator lights up, same as it does for real Scroll Lock. While it's on, dragging anywhere on the pad scrolls instead of moving the cursor:
+- The **first direction you move** after starting a drag picks the axis (horizontal or vertical) for that drag — mirroring how the circular gesture's starting edge picks its axis.
+- **Lift your finger and drag again** to pick a different axis; you don't need to toggle the mode off and on to switch between horizontal and vertical.
+- Tap **A** again to turn drag-to-scroll off and go back to normal cursor movement (and the circular gesture still works independently, any time).
+
 ## Tuning
 
 Everything above uses the QMK driver defaults. To change them, edit `keyboards/splitkb/halcyon/corne/keymaps/mak3r/`, then rebuild and reflash:
@@ -44,5 +50,8 @@ Everything above uses the QMK driver defaults. To change them, edit `keyboards/s
   - A larger `outer_ring_pct` makes the edge zone wider.
   - A smaller `trigger_ang` is more forgiving of movement toward the center.
   - A larger `wheel_clicks` scrolls faster.
+- **Drag-to-scroll speed**: `#define SCROLL_DRAG_THRESHOLD <n>` in `mouse_layer.c` — raw trackpad units per emitted scroll click. Smaller scrolls faster.
+- **Drag-to-scroll axis-switch timing**: `#define SCROLL_DRAG_AXIS_RESET_MS <ms>` in `mouse_layer.c` — how long your finger needs to be off the pad before the next drag can pick a different axis (default 150). Too short and a brief pause mid-drag could "forget" the axis; too long and lifting and redragging quickly won't re-pick it.
+- **Drag-to-scroll direction**: flip the sign on `report->v` in `apply_scroll_drag()` (`mouse_layer.c`) if vertical scrolling feels backwards.
 
 See `CLAUDE.md`'s "Layer 4 = mouse layer" notes for implementation details and gotchas.
