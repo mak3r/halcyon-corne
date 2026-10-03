@@ -44,6 +44,7 @@ The Cirque module sits in the right half's VIK slot with a slight rotational til
 - The **first direction you move** after starting a drag picks the axis (horizontal or vertical) for that drag — mirroring how the circular gesture's starting edge picks its axis.
 - **Lift your finger and drag again** to pick a different axis; you don't need to toggle the mode off and on to switch between horizontal and vertical.
 - Tap **A** again to turn drag-to-scroll off and go back to normal cursor movement (and the circular gesture still works independently, any time).
+- Toggling (either direction) disables cursor glide (see above) for as long as drag-to-scroll is active, and discards any leftover axis-lock state from the previous drag. Reported on hardware: without this, toggling right after lifting your trackpad finger could let glide's leftover "coasting" motion get read as a burst of scroll clicks, which some apps (Finder, not Chrome) can turn into a jump to the very top or bottom of the scroll area.
 
 ## Tuning
 

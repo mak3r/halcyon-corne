@@ -12,6 +12,9 @@
 
 #include "mouse_layer.h"
 #include "transactions.h"
+#if defined(POINTING_DEVICE_GESTURES_CURSOR_GLIDE_ENABLE)
+#    include "drivers/sensors/cirque_pinnacle_gestures.h"
+#endif
 
 // The Cirque module sits in the right half's VIK slot with a slight
 // north/south tilt -- on hardware, dragging straight "north" (away from
@@ -83,31 +86,48 @@ bool is_scroll_drag_active_synced(void) {
 
 typedef enum { SCROLL_AXIS_NONE, SCROLL_AXIS_H, SCROLL_AXIS_V } scroll_axis_t;
 
-static void apply_scroll_drag(report_mouse_t *report) {
-    static scroll_axis_t axis           = SCROLL_AXIS_NONE;
-    static int16_t       accum          = 0;
-    static uint32_t      last_motion_at = 0;
+// Module-level (not function-local) so toggling scroll-drag on/off can
+// reset them -- see scroll_drag_reset_state() below. Only the right half
+// ever has real motion to drive this, but keeping one set of state (not
+// split by left/right) matches that -- left's reports are always zero
+// here, so they're harmless no-ops through the idle branch below.
+static scroll_axis_t scroll_axis          = SCROLL_AXIS_NONE;
+static int16_t       scroll_accum         = 0;
+static uint32_t       scroll_last_motion_at = 0;
 
+static void scroll_drag_reset_state(void) {
+    scroll_axis           = SCROLL_AXIS_NONE;
+    scroll_accum          = 0;
+    scroll_last_motion_at = 0;
+}
+
+static void apply_scroll_drag(report_mouse_t *report) {
     if (report->x == 0 && report->y == 0) {
-        if (timer_elapsed32(last_motion_at) > SCROLL_DRAG_AXIS_RESET_MS) {
-            axis = SCROLL_AXIS_NONE; // finger lifted (or idle long enough) -- next motion re-picks the axis
+        if (timer_elapsed32(scroll_last_motion_at) > SCROLL_DRAG_AXIS_RESET_MS) {
+            scroll_axis = SCROLL_AXIS_NONE; // finger lifted (or idle long enough) -- next motion re-picks the axis
         }
         return;
     }
 
-    last_motion_at = timer_read32();
-    if (axis == SCROLL_AXIS_NONE) {
-        axis = (abs(report->x) >= abs(report->y)) ? SCROLL_AXIS_H : SCROLL_AXIS_V;
+    scroll_last_motion_at = timer_read32();
+    if (scroll_axis == SCROLL_AXIS_NONE) {
+        scroll_axis = (abs(report->x) >= abs(report->y)) ? SCROLL_AXIS_H : SCROLL_AXIS_V;
     }
 
-    accum += (axis == SCROLL_AXIS_H) ? report->x : report->y;
-    int8_t clicks = accum / SCROLL_DRAG_THRESHOLD;
-    accum -= (int16_t)clicks * SCROLL_DRAG_THRESHOLD;
+    scroll_accum += (scroll_axis == SCROLL_AXIS_H) ? report->x : report->y;
+    int8_t clicks = scroll_accum / SCROLL_DRAG_THRESHOLD;
+    scroll_accum -= (int16_t)clicks * SCROLL_DRAG_THRESHOLD;
+
+#if defined(CONSOLE_ENABLE)
+    if (clicks != 0) {
+        uprintf("SCROLL:%lu,%d,%d,%d,%d\n", timer_read32(), (int)report->x, (int)report->y, (int)scroll_axis, (int)clicks);
+    }
+#endif
 
     report->x = 0;
     report->y = 0;
-    report->h = (axis == SCROLL_AXIS_H) ? clicks : 0;
-    report->v = (axis == SCROLL_AXIS_V) ? -clicks : 0; // natural-scroll sign; flip if it feels backwards
+    report->h = (scroll_axis == SCROLL_AXIS_H) ? clicks : 0;
+    report->v = (scroll_axis == SCROLL_AXIS_V) ? -clicks : 0; // natural-scroll sign; flip if it feels backwards
 }
 #endif
 
@@ -139,6 +159,25 @@ void mouse_layer_process_record(uint16_t keycode, keyrecord_t *record) {
     // also meant to be free for the trackpad itself.
     if (keycode == KC_F13 && record->event.pressed) {
         scroll_drag_active = !scroll_drag_active;
+
+        // Toggling tends to happen right as you lift your trackpad finger
+        // to reach this key with your other hand -- exactly when cursor
+        // glide (see docs/TRACKPAD.md) starts "coasting" on leftover
+        // velocity from the liftoff. Reported on hardware: toggling either
+        // direction could make Finder's scroll jump all the way to the top
+        // or bottom (Chrome was unaffected) -- almost certainly a burst of
+        // several scroll "clicks" from that coasting motion landing on
+        // Finder's much more aggressive non-precise-wheel handling.
+        // Disable glide for as long as scroll-drag is active, and drop any
+        // stale axis-lock/accumulator state from a previous drag so
+        // nothing left over can leak into the next one either.
+#if defined(POINTING_DEVICE_GESTURES_CURSOR_GLIDE_ENABLE)
+        cirque_pinnacle_enable_cursor_glide(!scroll_drag_active);
+#endif
+        scroll_drag_reset_state();
+#if defined(CONSOLE_ENABLE)
+        uprintf("SCROLL_TOGGLE:%lu,%d\n", timer_read32(), scroll_drag_active);
+#endif
 
         // This key only exists on layer 4's keymap grid, so pressing it at
         // all means layer 4 is active right now -- but auto mouse's own
