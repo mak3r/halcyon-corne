@@ -16,13 +16,19 @@
 // whatever brightness is already saved. Adjust live via Vial's Lighting tab.
 #define RGB_MATRIX_DEFAULT_VAL 20
 
-// Turn the key LEDs (including ledmap.c's per-layer colors) off after 15
-// minutes with no key/trackpad input; the next input wakes them. The TFT
-// backlight has its own, shorter timeout (HLC_BACKLIGHT_TIMEOUT).
-#define RGB_MATRIX_TIMEOUT 900000
-// Share the input-activity timestamp across the split link. Without it,
-// each half only counts its own keys, so the non-master half would go dark
-// while you're still typing on the other one.
+// Disabled for now (0 = off, per QMK's `#if RGB_MATRIX_TIMEOUT > 0` guard --
+// compiles the timeout branch out entirely, not just a runtime no-op) --
+// was intended to turn the key LEDs off after 15 minutes idle, but one half
+// intermittently fails to actually turn off when this is enabled. See
+// https://github.com/mak3r/halcyon-corne/issues/1 before re-enabling.
+// The TFT backlight has its own, separate, shorter timeout
+// (HLC_BACKLIGHT_TIMEOUT) which is unaffected by this.
+#define RGB_MATRIX_TIMEOUT 0
+// Share the input-activity timestamp across the split link. Kept enabled
+// even with the timeout above disabled -- the diagnostic ACT: broadcast in
+// caps_word_sync.c (see issue #1) reads the same last_*_activity_elapsed()
+// functions this feeds, so turning it off would blind that instrumentation
+// for whenever the investigation resumes.
 #define SPLIT_ACTIVITY_ENABLE
 
 #define DYNAMIC_KEYMAP_LAYER_COUNT 8
