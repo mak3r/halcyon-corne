@@ -20,6 +20,7 @@
 
 static bool scroll_drag_active        = false;
 static bool scroll_drag_synced_active = false; // slave's view, pushed from master below
+static bool scroll_drag_added_latch   = false; // did WE set auto mouse's toggle flag -- see mouse_layer_process_record()
 
 static void scroll_drag_sync_slave_handler(uint8_t in_buflen, const void *in_data, uint8_t out_buflen, void *out_data) {
     if (in_buflen == sizeof(bool)) {
@@ -39,8 +40,9 @@ bool is_scroll_drag_active_synced(void) {
 // pixels, so passing raw x/y straight through would scroll wildly too
 // fast. Smaller = faster scrolling. Tune by feel, same spirit as
 // cirque_pinnacle_configure_circular_scroll()'s wheel_clicks parameter --
-// see docs/TRACKPAD.md.
-#    define SCROLL_DRAG_THRESHOLD 8
+// see docs/TRACKPAD.md. (Started at 8; first hardware test was far too
+// fast, bumped to 32.)
+#    define SCROLL_DRAG_THRESHOLD 32
 
 // How long with zero motion before the next movement is allowed to pick a
 // new axis -- long enough that a brief natural pause mid-drag doesn't
@@ -108,6 +110,30 @@ void mouse_layer_process_record(uint16_t keycode, keyrecord_t *record) {
     // also meant to be free for the trackpad itself.
     if (keycode == KC_F13 && record->event.pressed) {
         scroll_drag_active = !scroll_drag_active;
+
+        // This key only exists on layer 4's keymap grid, so pressing it at
+        // all means layer 4 is active right now -- but auto mouse's own
+        // AUTO_MOUSE_TIME (650ms) idle timeout would otherwise still turn
+        // layer 4 back off on its own schedule. If that happened between
+        // toggling scroll-drag on and tapping this key again to toggle it
+        // off, the second tap would land on whatever layer 0 has at this
+        // position (KC_A) instead of reaching this handler at all --
+        // toggling on would appear to work but toggling off wouldn't.
+        // Latch layer 4 on for as long as scroll-drag is active, the same
+        // mechanism TG(4) already uses (see the TO(0) handling above).
+        // Track whether WE did the latching so we don't clobber the
+        // user's own independent TG(4) toggle if they'd already set it.
+        if (scroll_drag_active) {
+            if (!get_auto_mouse_toggle()) {
+                auto_mouse_toggle();
+                scroll_drag_added_latch = true;
+            }
+        } else if (scroll_drag_added_latch) {
+            if (get_auto_mouse_toggle()) {
+                auto_mouse_toggle();
+            }
+            scroll_drag_added_latch = false;
+        }
     }
 #endif
 }
