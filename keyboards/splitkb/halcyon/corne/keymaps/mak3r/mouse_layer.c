@@ -13,6 +13,34 @@
 #include "mouse_layer.h"
 #include "transactions.h"
 
+// The Cirque module sits in the right half's VIK slot with a slight
+// north/south tilt -- on hardware, dragging straight "north" (away from
+// the user) reads as moving up and slightly northwest instead. This
+// rotates the right half's raw x/y by a fixed angle to correct for it,
+// before anything else (cursor movement, drag-to-scroll's axis lock)
+// consumes the report. Positive degrees rotate the corrected direction
+// clockwise; if up still drifts to one side, or drifts the other way,
+// flip the sign (recompute the two constants below for the new angle --
+// see docs/TRACKPAD.md). Precomputed rather than calling sinf/cosf at
+// runtime, since the angle is fixed at build time.
+//
+// 8 degrees: cos(8 deg) = 0.9902681, sin(8 deg) = 0.1391731
+#define CIRQUE_TILT_COS 0.9902681f
+#define CIRQUE_TILT_SIN 0.1391731f
+
+static int8_t clamp_i8(float v) {
+    if (v > 127.0f) return 127;
+    if (v < -127.0f) return -127;
+    return (int8_t)v;
+}
+
+static void apply_cirque_tilt_correction(report_mouse_t *report) {
+    float x = report->x;
+    float y = report->y;
+    report->x = clamp_i8(x * CIRQUE_TILT_COS - y * CIRQUE_TILT_SIN);
+    report->y = clamp_i8(x * CIRQUE_TILT_SIN + y * CIRQUE_TILT_COS);
+}
+
 #if defined(SCROLL_DRAG_MODE_ENABLE)
 // Toggle-able drag-to-scroll mode: A key, layer 4 (left of RClk/S) turns
 // trackpad drags into scroll events instead of cursor movement, as an
@@ -40,9 +68,10 @@ bool is_scroll_drag_active_synced(void) {
 // pixels, so passing raw x/y straight through would scroll wildly too
 // fast. Smaller = faster scrolling. Tune by feel, same spirit as
 // cirque_pinnacle_configure_circular_scroll()'s wheel_clicks parameter --
-// see docs/TRACKPAD.md. (Started at 8; first hardware test was far too
-// fast, bumped to 32.)
-#    define SCROLL_DRAG_THRESHOLD 32
+// see docs/TRACKPAD.md. (Started at 8, then 32; still too fast on
+// hardware, now 40. Not required to be a power of 2 -- it's just an
+// integer divisor.)
+#    define SCROLL_DRAG_THRESHOLD 40
 
 // How long with zero motion before the next movement is allowed to pick a
 // new axis -- long enough that a brief natural pause mid-drag doesn't
@@ -145,6 +174,8 @@ void mouse_layer_process_record(uint16_t keycode, keyrecord_t *record) {
 // inside it is), since scroll-drag's own transform needs to run
 // regardless of whether the diagnostic channel is compiled in.
 report_mouse_t pointing_device_task_combined_user(report_mouse_t left_report, report_mouse_t right_report) {
+    apply_cirque_tilt_correction(&right_report);
+
 #if defined(CONSOLE_ENABLE)
     if (left_report.x || left_report.y || right_report.x || right_report.y) {
         static uint32_t last_log = 0;

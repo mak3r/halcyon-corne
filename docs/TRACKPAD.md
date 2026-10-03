@@ -22,6 +22,10 @@ You can also turn layer 4 on from layer 3:
 
 The desktop HUD deliberately stays hidden on layer 4. Otherwise it would flash up every time you touch the trackpad. Pin the HUD to see this layer.
 
+## Tilt correction
+
+The Cirque module sits in the right half's VIK slot with a slight rotational tilt, so dragging straight "north" (away from you) reads as moving up and slightly to one side rather than straight up. This is corrected in firmware (`apply_cirque_tilt_correction()` in `mouse_layer.c`, applied to every trackpad report before anything else uses it — cursor movement and drag-to-scroll's axis lock both benefit). See **Tuning** below if it needs adjusting for your unit.
+
 ## Gestures
 
 **Tap to click**: a quick tap on the pad is a left click.
@@ -53,5 +57,6 @@ Everything above uses the QMK driver defaults. To change them, edit `keyboards/s
 - **Drag-to-scroll speed**: `#define SCROLL_DRAG_THRESHOLD <n>` in `mouse_layer.c` — raw trackpad units per emitted scroll click. Smaller scrolls faster.
 - **Drag-to-scroll axis-switch timing**: `#define SCROLL_DRAG_AXIS_RESET_MS <ms>` in `mouse_layer.c` — how long your finger needs to be off the pad before the next drag can pick a different axis (default 150). Too short and a brief pause mid-drag could "forget" the axis; too long and lifting and redragging quickly won't re-pick it.
 - **Drag-to-scroll direction**: flip the sign on `report->v` in `apply_scroll_drag()` (`mouse_layer.c`) if vertical scrolling feels backwards.
+- **Tilt correction angle**: `CIRQUE_TILT_COS`/`CIRQUE_TILT_SIN` in `mouse_layer.c`, precomputed for a fixed angle (currently 8°) rather than computed at runtime. To change the angle, recompute both constants for the new value, e.g. `python3 -c "import math; d=10; print(math.cos(math.radians(d)), math.sin(math.radians(d)))"`. If straight-up drag still drifts to one side, or now drifts the other way, try a negative angle instead (same magnitude, flip the sign on both constants) — the correct sign isn't obvious from code alone and needs on-hardware testing.
 
 See `CLAUDE.md`'s "Layer 4 = mouse layer" notes for implementation details and gotchas.
