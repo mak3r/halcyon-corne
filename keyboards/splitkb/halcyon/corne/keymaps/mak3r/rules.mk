@@ -12,6 +12,8 @@ USER_NAME := halcyon_modules
 
 SRC += halcyon_overrides.c
 SRC += ledmap.c
+# RM_NEXT/RM_PREV cycle per-keymap lighting modes (see lighting_modes.c).
+SRC += lighting_modes.c
 
 # Broadcasts the active layer number over a separate USB HID interface
 # (see hud_console.c) for a future desktop HUD app to read.

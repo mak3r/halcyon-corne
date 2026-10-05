@@ -11,8 +11,9 @@
 // RPC_ID_SCROLL_DRAG is unused by anything except mak3r's own
 // mouse_layer.c (SCROLL_DRAG_MODE_ENABLE, set only in that keymap's
 // config.h) -- reserved here anyway since this ID list is shared across
-// all keymaps; harmless for keymaps that never send/receive it.
-#define SPLIT_TRANSACTION_IDS_USER RPC_ID_CAPS_WORD, RPC_ID_SCROLL_DRAG
+// all keymaps; harmless for keymaps that never send/receive it. Same for
+// RPC_ID_LIGHTING_MODE (mak3r's lighting_modes.c).
+#define SPLIT_TRANSACTION_IDS_USER RPC_ID_CAPS_WORD, RPC_ID_SCROLL_DRAG, RPC_ID_LIGHTING_MODE
 
 #define SPLIT_POINTING_ENABLE
 #define POINTING_DEVICE_COMBINED
