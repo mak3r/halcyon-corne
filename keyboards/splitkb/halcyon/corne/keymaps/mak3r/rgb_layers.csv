@@ -138,7 +138,7 @@ layer,row,col,h,s,v
 3,8,4,188,255,255
 3,8,5,188,255,255
 
-# --- Layer 4: Mouse -- dim white fill, click keys (S/D/F = right/middle/left) orange, A (scroll-drag toggle) blue (same as Shift/Tab/Esc/Del/Bksp elsewhere), TO(0) middle thumbs red. ---
+# --- Layer 4: Mouse -- dim white fill, click keys (S/D/F = right/middle/left) orange, A (scroll-drag toggle) blue (same as Shift/Tab/Esc/Del/Bksp elsewhere), TO(0) middle thumbs red, mouse-move keys (J/K/L/;) orange like the clicks, scroll keys (M/,/./slash) blue like the scroll toggle. ---
 4,*,*,0,0,216
 4,1,1,152,255,255
 4,1,2,21,255,255
@@ -146,6 +146,14 @@ layer,row,col,h,s,v
 4,1,4,21,255,255
 4,3,4,0,255,255
 4,8,4,0,255,255
+4,6,4,21,255,255
+4,6,3,21,255,255
+4,6,2,21,255,255
+4,6,1,21,255,255
+4,7,4,152,255,255
+4,7,3,152,255,255
+4,7,2,152,255,255
+4,7,1,152,255,255
 
 # --- Layer 5: Return2 -- dim white. ---
 5,*,*,0,0,234
