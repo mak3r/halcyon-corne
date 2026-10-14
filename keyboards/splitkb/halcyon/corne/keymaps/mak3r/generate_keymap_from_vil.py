@@ -48,6 +48,16 @@ KEYCODE_ALIAS_FIXUPS = {
     "KC_BSLASH": "KC_BSLS",
     "KC_PGDOWN": "KC_PGDN",
     "KC_PSCREEN": "KC_PSCR",
+    # Vial's short mouse key names. These compile, but keymap.json, the HUD
+    # and tya-corne's generator all use the long spelling.
+    "KC_MS_U": "KC_MS_UP",
+    "KC_MS_D": "KC_MS_DOWN",
+    "KC_MS_L": "KC_MS_LEFT",
+    "KC_MS_R": "KC_MS_RIGHT",
+    "KC_WH_U": "KC_MS_WH_UP",
+    "KC_WH_D": "KC_MS_WH_DOWN",
+    "KC_WH_L": "KC_MS_WH_LEFT",
+    "KC_WH_R": "KC_MS_WH_RIGHT",
 }
 
 

@@ -40,12 +40,31 @@
 #define POINTING_DEVICE_AUTO_MOUSE_ENABLE
 #define AUTO_MOUSE_DEFAULT_LAYER 4
 
-// Toggle-able drag-to-scroll mode (A key, layer 4 -- see mouse_layer.c).
+// Toggle-able drag-to-scroll mode (KC_F13, layer 4 -- see mouse_layer.c).
 // Guards hlc_tft_display.c's "Scroll" indicator so it also lights up for
 // this, not just real Scroll Lock -- same pattern as CAPS_WORD_ENABLE's
 // guard there, but this one is mak3r-only (not a repo-wide default), since
 // the feature only exists in this keymap's own mouse_layer.c.
 #define SCROLL_DRAG_MODE_ENABLE
+
+// Mouse keys (layer 4). The stock speed-up reached about 4000 px/s in
+// 0.6 s, which threw the pointer into the screen edges. These settings
+// give, at 16 ms per step (about 62 steps/s):
+// - normal: starts at 4 px/step (250 px/s), reaching 20 (1250 px/s) in
+//   about 0.8 s
+// - ACL0 slow: 1 px/step (62 px/s), MK_COMBINED's precision speed
+// - ACL1 medium: MOVE_DELTA * MAX_SPEED / 2 = 10 px/step (625 px/s)
+// - ACL2 fast: MOUSEKEY_MOVE_MAX = 40 px/step (2500 px/s)
+// The ACL keys latch (mouse_layer.c), and they change scrolling as well:
+// 1 / 4 / 8 clicks per step. tya-corne's speeds match (scripts/
+// generate_keymap.py there), so keep the two in step when tuning.
+#define MK_COMBINED
+#define MOUSEKEY_INTERVAL 16
+#define MOUSEKEY_MOVE_DELTA 4
+#define MOUSEKEY_MAX_SPEED 5
+#define MOUSEKEY_TIME_TO_MAX 50
+#define MOUSEKEY_MOVE_MAX 40
+#define MOUSEKEY_WHEEL_MAX 8
 
 #define HALCYON_LEGACY
 

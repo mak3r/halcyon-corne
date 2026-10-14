@@ -45,7 +45,7 @@ static void apply_cirque_tilt_correction(report_mouse_t *report) {
 }
 
 #if defined(SCROLL_DRAG_MODE_ENABLE)
-// Toggle-able drag-to-scroll mode: A key, layer 4 (left of RClk/S) turns
+// Toggle-able drag-to-scroll mode: KC_F13 on layer 4 (the T key) turns
 // trackpad drags into scroll events instead of cursor movement, as an
 // alternative to the circular edge-scroll gesture. See docs/TRACKPAD.md.
 
@@ -139,7 +139,36 @@ void pointing_device_init_user(void) {
 #endif
 }
 
-void mouse_layer_process_record(uint16_t keycode, keyrecord_t *record) {
+// Mouse speed keys (KC_ACL0/1/2, layer 4 U/I/O) latch instead of acting
+// only while held: tap one to lock that steady speed (slow/medium/fast),
+// tap it again to go back to the normal speed-up, tap another to switch.
+// Holding a speed key and a direction key at once needs too many fingers.
+// QMK's own toggle mode (MK_3_SPEED) can't go back to the speed-up, so this
+// holds QMK's acceleration bit on through mousekey_on()/mousekey_off()
+// instead, and skips QMK's own handling of the key. The speeds themselves
+// are set in config.h (MK_COMBINED). tya-corne does the same with hidden
+// speed layers.
+static uint16_t locked_speed_key = KC_NO;
+
+static bool mouse_speed_process_record(uint16_t keycode, keyrecord_t *record) {
+    if (keycode < QK_MOUSE_ACCELERATION_0 || keycode > QK_MOUSE_ACCELERATION_2) {
+        return true;
+    }
+    if (record->event.pressed) {
+        if (locked_speed_key != KC_NO) {
+            mousekey_off((uint8_t)locked_speed_key);
+        }
+        if (locked_speed_key == keycode) {
+            locked_speed_key = KC_NO;
+        } else {
+            mousekey_on((uint8_t)keycode);
+            locked_speed_key = keycode;
+        }
+    }
+    return false;
+}
+
+bool mouse_layer_process_record(uint16_t keycode, keyrecord_t *record) {
     // TG(4) sets auto mouse's "toggled" flag, which keeps layer 4 latched
     // on. TO(0) moves back to layer 0 but auto mouse doesn't clear that
     // flag for it, so the next trackpad movement would latch layer 4 on
@@ -204,6 +233,8 @@ void mouse_layer_process_record(uint16_t keycode, keyrecord_t *record) {
         }
     }
 #endif
+
+    return mouse_speed_process_record(keycode, record);
 }
 
 // Diagnostic logging below (MOTION:) predates and is unrelated to scroll-

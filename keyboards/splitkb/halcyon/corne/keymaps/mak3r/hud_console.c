@@ -27,7 +27,9 @@ layer_state_t layer_state_set_user(layer_state_t state) {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     uprintf("KEY:%d,%d,%d\n", record->event.key.row, record->event.key.col, record->event.pressed);
-    mouse_layer_process_record(keycode, record);
+    if (!mouse_layer_process_record(keycode, record)) {
+        return false;
+    }
 #ifdef RGB_MATRIX_ENABLE
     return lighting_modes_process_record(keycode, record);
 #else

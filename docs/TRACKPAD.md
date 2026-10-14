@@ -4,15 +4,19 @@ How the Cirque trackpad (right half) behaves with the `mak3r` keymap. All of thi
 
 ## Mouse layer (layer 4)
 
-Using the trackpad turns on layer 4 automatically (QMK's [auto mouse layer](https://docs.qmk.fm/features/pointing_device#pointing-device-auto-mouse)), so the click keys are ready while your hand stays on the keyboard.
+Using the trackpad turns on layer 4 automatically (QMK's [auto mouse layer](https://docs.qmk.fm/features/pointing_device#pointing-device-auto-mouse)), so the click keys are ready while your hand stays on the keyboard. The same layer has mouse keys for when you'd rather not reach for the pad (the Typeractive has no trackpad, so it uses them for everything).
 
-| Key (left home row) | Action |
+| Key | Action |
 |---|---|
-| F | Left click |
-| D | Middle click |
-| S | Right click |
-| A | Toggle drag-to-scroll mode (see below) |
+| A / ; | Left click / right click |
+| S and L | Middle click |
+| D / F / J / K | Pointer down / right / left / up |
+| C / V / M / , | Scroll right / down / up / left |
+| U / I / O | Lock pointer speed slow / medium / fast (see below) |
+| T | Toggle drag-to-scroll mode (see below) |
 | Middle thumb key (either side) | Back to layer 0 (`TO(0)`) |
+
+**Pointer speed keys**: tap U, I or O to lock the mouse keys at a steady slow (about 62 px/s, for precise positioning), medium (625 px/s) or fast (2500 px/s) speed. Tap the same key again to go back to normal, where the pointer starts at 250 px/s and speeds up to 1250 px/s over about 0.8 s. Tapping a different speed key switches straight to it. The lock stays on while you move, click and scroll, and it changes scrolling too (1 / 4 / 8 clicks per step). These are QMK's `KC_ACL0`/`1`/`2`, made to latch in `mouse_layer.c` instead of acting only while held.
 
 Layer 4 turns off by itself after ~650ms with no trackpad or click activity, or as soon as you press any non-mouse key. Every other key on layer 4 is transparent.
 
@@ -40,16 +44,17 @@ The Cirque module sits in the right half's VIK slot with a slight rotational til
    - Start on the **left** edge: scroll **left/right**.
 4. **Keep circling** to keep scrolling, about 18 wheel steps per full circle.
 
-**Drag-to-scroll mode**: an alternative to the circular gesture, for when it's hard to land precisely in the edge zone. Tap **A** (layer 4) to toggle it on — the TFT's "Scroll" indicator lights up, same as it does for real Scroll Lock. While it's on, dragging anywhere on the pad scrolls instead of moving the cursor:
+**Drag-to-scroll mode**: an alternative to the circular gesture, for when it's hard to land precisely in the edge zone. Tap **T** (layer 4) to toggle it on — the TFT's "Scroll" indicator lights up, same as it does for real Scroll Lock. While it's on, dragging anywhere on the pad scrolls instead of moving the cursor:
 - The **first direction you move** after starting a drag picks the axis (horizontal or vertical) for that drag — mirroring how the circular gesture's starting edge picks its axis.
 - **Lift your finger and drag again** to pick a different axis; you don't need to toggle the mode off and on to switch between horizontal and vertical.
-- Tap **A** again to turn drag-to-scroll off and go back to normal cursor movement (and the circular gesture still works independently, any time).
+- Tap **T** again to turn drag-to-scroll off and go back to normal cursor movement (and the circular gesture still works independently, any time).
 - Toggling (either direction) disables cursor glide (see above) for as long as drag-to-scroll is active, and discards any leftover axis-lock state from the previous drag. Reported on hardware: without this, toggling right after lifting your trackpad finger could let glide's leftover "coasting" motion get read as a burst of scroll clicks, which some apps (Finder, not Chrome) can turn into a jump to the very top or bottom of the scroll area.
 
 ## Tuning
 
 Everything above uses the QMK driver defaults. To change them, edit `keyboards/splitkb/halcyon/corne/keymaps/mak3r/`, then rebuild and reflash:
 
+- **Mouse key speeds**: the `MOUSEKEY_*` defines in `config.h` (the comment there gives the resulting speeds). tya-corne's `MOVE_SPEED`/`SPEED_LAYERS` (in its `scripts/generate_keymap.py`) match them, so change both together.
 - **How long layer 4 stays on**: `#define AUTO_MOUSE_TIME <ms>` in `config.h` (default 650).
 - **Edge scroll feel**: call `cirque_pinnacle_configure_circular_scroll(outer_ring_pct, trigger_px, trigger_ang, wheel_clicks, left_handed)` from `pointing_device_init_user()` in `mouse_layer.c`. The defaults are `33, 16, 9102 /* 50° */, 18, false`.
   - A larger `outer_ring_pct` makes the edge zone wider.
