@@ -63,3 +63,15 @@
     {KC_NO, KC_NO, KC_NO, k8D, k8E, k8F}, \
     {k9A, k9B, k9C, k9D, k9E, KC_NO} \
 }
+
+// keymap.json is the layout shared with the wireless Typeractive Corne
+// (tya-corne), so it holds Bluetooth/output keys this board can't do. They
+// do nothing here. Keep this list in sync with WIRELESS_ONLY_KEYCODES in
+// generate_keymap_from_vil.py and tya-corne's generate_keymap.py.
+#define OUT_TOG KC_NO
+#define BT_CLR KC_NO
+#define BT_SEL_0 KC_NO
+#define BT_SEL_1 KC_NO
+#define BT_SEL_2 KC_NO
+#define BT_SEL_3 KC_NO
+#define BT_SEL_4 KC_NO

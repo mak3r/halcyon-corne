@@ -12,6 +12,12 @@ with generate_ledmap.py if the key layout change also needs new colors.
 Requires the .vil to have been exported under the LEGACY row/column matrix
 (module buttons as extra rows -- see CLAUDE.md's "Related repos" section on
 mak3rs.vil), matching this keymap's HALCYON_LEGACY / LAYOUT_corne_hlc setup.
+
+keymap.json is the layout shared with the wireless Typeractive Corne
+(tya-corne), so it can hold Bluetooth/output keycodes that QMK and Vial
+don't have (WIRELESS_ONLY_KEYCODES, #defined to KC_NO in config.h). Vial
+exports show those spots as KC_NO, so a spot where keymap.json has one of
+these and the .vil has KC_NO keeps the keymap.json keycode.
 """
 import argparse
 import json
@@ -42,6 +48,13 @@ KEYCODE_ALIAS_FIXUPS = {
     "KC_BSLASH": "KC_BSLS",
     "KC_PGDOWN": "KC_PGDN",
     "KC_PSCREEN": "KC_PSCR",
+}
+
+
+# Keycodes in the shared layout that only the Typeractive (ZMK) can do.
+# Must match the #defines in config.h and tya-corne's generate_keymap.py.
+WIRELESS_ONLY_KEYCODES = {
+    "OUT_TOG", "BT_CLR", "BT_SEL_0", "BT_SEL_1", "BT_SEL_2", "BT_SEL_3", "BT_SEL_4",
 }
 
 
@@ -80,14 +93,37 @@ def fmt_row(vals, width=10):
     return ", ".join(f'"{v}"'.ljust(width) for v in vals)
 
 
+def load_existing_layers():
+    """The current keymap.json's layers (52-entry flat lists), or None."""
+    if not KEYMAP_JSON_PATH.exists():
+        return None
+    text = re.sub(r"^\s*//.*$", "", KEYMAP_JSON_PATH.read_text(), flags=re.M)
+    return json.loads(text)["layers"]
+
+
+def keep_wireless_keycodes(flat_layers, existing):
+    """Put back wireless-only keycodes that the .vil can only show as KC_NO."""
+    if existing is None:
+        return
+    for li, (new, old) in enumerate(zip(flat_layers, existing)):
+        for pos, (new_kc, old_kc) in enumerate(zip(new, old)):
+            if old_kc in WIRELESS_ONLY_KEYCODES:
+                if new_kc == "KC_NO":
+                    new[pos] = old_kc
+                else:
+                    print(f"note: layer {li} pos {pos}: {old_kc} replaced by {new_kc} from the .vil")
+
+
 def build_keymap_json(vil, keymap_name):
     layers = vil["layout"]
     encoders = vil["encoder_layout"]
     assert len(layers) == 8, f"expected 8 layers (DYNAMIC_KEYMAP_LAYER_COUNT), got {len(layers)}"
 
+    flat_layers = [flatten(layer) for layer in layers]
+    keep_wireless_keycodes(flat_layers, load_existing_layers())
+
     layer_blocks = []
-    for layer in layers:
-        f = flatten(layer)
+    for f in flat_layers:
         line0 = fmt_row(f[0:12])
         line1 = fmt_row(f[12:24])
         line2 = fmt_row(f[24:36])

@@ -45,9 +45,9 @@
                         "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" 
         ],
         [
-            "KC_NO"   , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS"  ,
-            "KC_NO"   , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS"  ,
-            "KC_NO"   , "KC_NO"   , "KC_NO"   , "KC_NO"   , "KC_NO"   , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS"  ,
+            "OUT_TOG" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS"  ,
+            "BT_CLR"  , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS"  ,
+            "BT_SEL_0", "BT_SEL_1", "BT_SEL_2", "BT_SEL_3", "BT_SEL_4", "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS"  ,
                                                 "KC_TRNS" , "TO(0)"   , "KC_TRNS" , "KC_TRNS" , "TO(0)"   , "KC_TRNS"  ,
                         "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" , "KC_TRNS" 
         ],
