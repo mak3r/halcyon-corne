@@ -11,12 +11,13 @@ Using the trackpad turns on layer 4 automatically (QMK's [auto mouse layer](http
 | A / ; | Left click / right click |
 | S and L | Middle click |
 | D / F / J / K | Pointer down / right / left / up |
-| C / V / M / , | Scroll right / down / up / left |
-| U / I / O | Lock pointer speed slow / medium / fast (see below) |
+| E / R / U / I | Scroll right / down / up / left |
+| Right outer column, top / middle / bottom | Lock pointer speed slow / medium / fast (see below) |
 | T | Toggle drag-to-scroll mode (see below) |
-| Middle thumb key (either side) | Back to layer 0 (`TO(0)`) |
+| Left middle thumb | Back to layer 0 (`TO(0)`) |
+| Right middle thumb | `MO(2)`, the same as on layer 0, for switching workspaces |
 
-**Pointer speed keys**: tap U, I or O to lock the mouse keys at a steady slow (about 62 px/s, for precise positioning), medium (625 px/s) or fast (2500 px/s) speed. Tap the same key again to go back to normal, where the pointer starts at 250 px/s and speeds up to 1250 px/s over about 0.8 s. Tapping a different speed key switches straight to it. The lock stays on while you move, click and scroll, and it changes scrolling too (1 / 4 / 8 clicks per step). These are QMK's `KC_ACL0`/`1`/`2`, made to latch in `mouse_layer.c` instead of acting only while held.
+**Pointer speed keys**: tap a key in the right outer column (top, middle or bottom) to lock the mouse keys at a steady slow (about 62 px/s, for precise positioning), medium (625 px/s) or fast (2500 px/s) speed. Tap the same key again to go back to normal, where the pointer starts at 250 px/s and speeds up to 1250 px/s over about 0.8 s. Tapping a different speed key switches straight to it. The lock stays on while you move, click and scroll, and it changes scrolling too (1 / 4 / 8 clicks per step). These are QMK's `KC_ACL0`/`1`/`2`, made to latch in `mouse_layer.c` instead of acting only while held.
 
 Layer 4 turns off by itself after ~650ms with no trackpad or click activity, or as soon as you press any non-mouse key. Every other key on layer 4 is transparent.
 

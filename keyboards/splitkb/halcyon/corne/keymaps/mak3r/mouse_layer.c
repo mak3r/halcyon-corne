@@ -2,7 +2,7 @@
 // (POINTING_DEVICE_AUTO_MOUSE_ENABLE, see config.h) turns layer 4 on as
 // soon as the Cirque trackpad reports movement, and turns it back off after
 // AUTO_MOUSE_TIME without mouse activity or on any non-mouse key. Layer 4
-// still has TO(0) on both middle thumb keys as an explicit way out, and is
+// still has TO(0) on the left middle thumb as an explicit way out, and is
 // still reachable manually via OSL(4)/TG(4) on layer 3.
 //
 // With SPLIT_POINTING_ENABLE + POINTING_DEVICE_COMBINED this runs on
@@ -139,7 +139,7 @@ void pointing_device_init_user(void) {
 #endif
 }
 
-// Mouse speed keys (KC_ACL0/1/2, layer 4 U/I/O) latch instead of acting
+// Mouse speed keys (KC_ACL0/1/2, layer 4's right outer column) latch instead of acting
 // only while held: tap one to lock that steady speed (slow/medium/fast),
 // tap it again to go back to the normal speed-up, tap another to switch.
 // Holding a speed key and a direction key at once needs too many fingers.
